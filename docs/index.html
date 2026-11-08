@@ -499,7 +499,8 @@ const charsFor = key => [...((DICT.chars || {})[key] || '')];
 const sayKey = key => charsFor(key)[0] || fmtKey(key);
 
 // ---------- 設定 ----------
-const DEFAULT_PHRASES = ['我要喝水', '我想上廁所', '我會痛', '我想休息', '我肚子餓', '請幫我', '不要', '謝謝'];
+const DEFAULT_PHRASES = ['我要喝水', '我想上廁所', '我會痛', '我想睡覺', '我肚子餓', '請幫我', '不要', '要'];
+const OLD_DEFAULT_PHRASES = ['我要喝水', '我想上廁所', '我會痛', '我想休息', '我肚子餓', '請幫我', '不要', '謝謝'];
 const DEFAULTS = {
   press: 'lift', holdTime: 0.6, guard: 0.4, bubble: true,
   layout: 'big', size: 1, calm: false,
@@ -510,7 +511,8 @@ const DEFAULTS = {
 const STORE = 'zhuyin-board:v1';
 const stored = (() => { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch { return {}; } })();
 const cfg = Object.assign({}, DEFAULTS, stored.settings || {});
-if (!Array.isArray(cfg.phrases)) cfg.phrases = DEFAULT_PHRASES.slice();
+// 沒改過常用句的裝置，換成新的預設；自己改過的不動
+if (!Array.isArray(cfg.phrases) || cfg.phrases.join('\n') === OLD_DEFAULT_PHRASES.join('\n')) cfg.phrases = DEFAULT_PHRASES.slice();
 
 // ---------- 狀態 ----------
 const S = {

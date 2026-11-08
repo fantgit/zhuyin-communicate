@@ -1,5 +1,5 @@
 // 離線快取：先用快取（沒有網路也能馬上打開），同時在背景抓新版，下次打開就是新版
-const CACHE = 'zhuyin-communicate-b3898eaa42';
+const CACHE = 'zhuyin-communicate-3621e63a6f';
 const FILES = ["./", "index.html", "data/zhuyin-dict.js", "manifest.webmanifest", "icons/icon-180.png", "icons/icon-192.png", "fonts/zhuyinboard-round.woff2"];
 
 self.addEventListener('install', e => e.waitUntil((async () => {

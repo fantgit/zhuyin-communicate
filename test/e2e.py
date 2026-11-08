@@ -172,6 +172,8 @@ async def functional(page, url):
 
     # 常用句、唸出來
     await tap(page, '#board [data-say="常用句"]')
+    says = await page.eval_on_selector_all('#board [data-target]', 'els => els.map(e => e.dataset.say)')
+    check("default phrases: 我想睡覺 and 要 replace 我想休息 and 謝謝", "我想睡覺" in says and "要" in says and "謝謝" not in says and "我想休息" not in says, says)
     await tap(page, '#board [data-say="我要喝水"]')
     s = await st(page)
     check("phrase typed and spoken", s["text"].endswith("我要喝水") and "我要喝水" in s["said"], (s["text"], s["said"][-2:]))
@@ -237,6 +239,24 @@ async def functional(page, url):
               "restedThenSlip": "B", "settledOnLast": "B", "cancelZone": None, "slipOffEdge": "A"}
     for k, v in expect.items():
         check(f"pure: {k}", pure[k] == v, pure[k])
+
+
+async def migration(browser, url):
+    ctx = await browser.new_context(service_workers="block")
+    page = await ctx.new_page()
+    await page.goto(url)
+    store = "list => localStorage.setItem('zhuyin-board:v1', JSON.stringify({settings: {phrases: list}, text: []}))"
+    old = ['我要喝水', '我想上廁所', '我會痛', '我想休息', '我肚子餓', '請幫我', '不要', '謝謝']
+    await page.evaluate(store, old)
+    await page.reload()
+    got = await page.evaluate("ZhuyinBoard.cfg.phrases")
+    check("devices still on the old default phrases get the new ones", got[3] == '我想睡覺' and got[7] == '要', got)
+    mine = ['我要喝水', '謝謝']
+    await page.evaluate(store, mine)
+    await page.reload()
+    got = await page.evaluate("ZhuyinBoard.cfg.phrases")
+    check("a phrase list someone edited is left alone", got == mine, got)
+    await ctx.close()
 
 
 async def offline(browser, url):
@@ -321,6 +341,7 @@ async def main():
                 check("functional run finished", False, repr(e))
             check("no page errors during the run", not errs, errs[:3])
             await ctx.close()
+            await migration(browser, url)
             await offline(browser, url)
             await shots(browser, url)
             await browser.close()
