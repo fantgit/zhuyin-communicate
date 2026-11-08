@@ -1,14 +1,14 @@
 {
   "id": "./",
-  "name": "眼睛注音板",
-  "short_name": "眼睛注音板",
+  "name": "注音溝通板",
+  "short_name": "注音溝通板",
   "lang": "zh-Hant-TW",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#E7ECEE",
-  "theme_color": "#1D6C75",
+  "background_color": "#E5EBE8",
+  "theme_color": "#0A6670",
   "icons": [
     {
       "src": "icons/icon-192.png",

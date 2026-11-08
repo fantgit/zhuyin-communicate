@@ -22,7 +22,7 @@ FAMILY = "ZhuyinBoard Round"
 def wanted_text() -> str:
     chars = {chr(c) for c in range(0x3100, 0x3130)} | set("ˉˊˇˋ˙") | {chr(c) for c in range(0x20, 0x7F)}
     chars |= set("，。？！、：；「」『』（）…—・→")
-    for f in ("data/zhuyin-dict.js", "index.html", "app.js", "gaze.js"):
+    for f in ("data/zhuyin-dict.js", "index.html"):
         chars |= {c for c in (ROOT / f).read_text(encoding="utf-8") if ord(c) > 0x7E}
     return "".join(sorted(chars))
 

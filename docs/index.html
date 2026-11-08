@@ -6,67 +6,78 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="眼睛注音板">
-<meta name="theme-color" content="#E7ECEE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#11171A" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-title" content="注音溝通板">
+<meta name="theme-color" content="#E5EBE8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1619" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
-<title>眼睛注音板</title>
+<title>注音溝通板</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>@font-face{font-family:"ZhuyinBoard Round";src:url("fonts/zhuyinboard-round.woff2") format("woff2");font-display:swap}</style>
 <style>
-/* Layout: one-screen board. A calm top band (typed text + the four syllable slots — a safe place to rest the eyes),
-   a grid of at most 8 big targets, and a fixed 3-key rail (right side in landscape, bottom in portrait). */
+/* Layout: one-screen board like a classroom zhuyin magnet board. A thin strip of typed words on top (it also shows the
+   zhuyin being spelled, and lifting a finger there cancels), a grid of at most 8 thick pressable blocks that take all
+   the remaining room (or all 37 zhuyin on one page), and a fixed 3-key rail (right in landscape, bottom in portrait). */
 :root {
-  --bg: #E7ECEE;
-  --surface: #FAFBFB;
-  --ink: #1B282E;
-  --muted: #56666D;
-  --line: #C9D3D7;
-  --focus: #1D6C75;
-  --focus-soft: rgba(29, 108, 117, .17);
+  --paper: #E5EBE8;
+  --panel: #FBFCFB;
+  --ink: #13212A;
+  --muted: #3E4F57;
+  --line: #C2CEC9;
+  --focus: #0A6670;
+  --focus-edge: #064A51;
+  --focus-soft: rgba(10, 102, 112, .22);
   --on-focus: #FFFFFF;
-  --ini-bg: #DAE5F1; --ini-ink: #214E7A;
-  --med-bg: #D7ECDF; --med-ink: #235E3D;
-  --fin-bg: #F3E4CC; --fin-ink: #774F12;
-  --tone-bg: #E4DEF0; --tone-ink: #52407C;
-  --fn-bg: #DCE3E6; --fn-ink: #2E4048;
-  --warn-bg: #F2DCD7; --warn-ink: #8A3426;
-  --font-board: "ZhuyinBoard Round", "PingFang TC", "Noto Sans TC", "Heiti TC", sans-serif;
+  --shadow: rgba(19, 33, 42, .28);
+  --ini-bg: #CEDFF3; --ini-ink: #0D3257; --ini-edge: #98B7DC;
+  --med-bg: #C9E7D2; --med-ink: #0E4327; --med-edge: #8EC3A0;
+  --fin-bg: #F3DBB0; --fin-ink: #4F3103; --fin-edge: #D3AE6C;
+  --tone-bg: #DDD3F0; --tone-ink: #35215C; --tone-edge: #AE9BD5;
+  --fn-bg: #D5DDE0; --fn-ink: #17262D; --fn-edge: #A3B2B8;
+  --char-bg: #FBFCFB; --char-ink: #13212A; --char-edge: #B5C3BF;
+  --warn-bg: #F0CEC4; --warn-ink: #6B1E0D; --warn-edge: #D29B8C;
+  --font-board: "ZhuyinBoard Round", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-ui: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --scale: 1;
-  --gap: clamp(10px, 1.7vmin, 18px);
+  --gap: clamp(10px, 1.6vmin, 16px);
   --radius: 22px;
-  --rail: clamp(140px, 15vw, 188px);
+  --edge: 6px;
+  --rail: clamp(150px, 16vw, 200px);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #11171A; --surface: #1A2226; --ink: #E4ECEE; --muted: #97A8AF; --line: #2B373C;
-    --focus: #5DBEC6; --focus-soft: rgba(93, 190, 198, .22); --on-focus: #0E2226;
-    --ini-bg: #1D3350; --ini-ink: #A8CAEE; --med-bg: #1B3B2A; --med-ink: #A3DBBA;
-    --fin-bg: #403118; --fin-ink: #EFCB8F; --tone-bg: #31284A; --tone-ink: #CBBCEE;
-    --fn-bg: #232E33; --fn-ink: #C6D3D8; --warn-bg: #43221C; --warn-ink: #F1B3A6;
+    --paper: #0F1619; --panel: #182125; --ink: #E5EDEF; --muted: #A6B5BB; --line: #2C383D;
+    --focus: #5CC2CB; --focus-edge: #2E8790; --focus-soft: rgba(92, 194, 203, .24); --on-focus: #062326; --shadow: rgba(0, 0, 0, .55);
+    --ini-bg: #1B3250; --ini-ink: #B8D5F3; --ini-edge: #0E1D30;
+    --med-bg: #173A27; --med-ink: #AADEBD; --med-edge: #0B2116;
+    --fin-bg: #3E2E12; --fin-ink: #F1D199; --fin-edge: #241A08;
+    --tone-bg: #2C2346; --tone-ink: #D1C3F1; --tone-edge: #18122A;
+    --fn-bg: #222C31; --fn-ink: #CDD8DD; --fn-edge: #12191C;
+    --char-bg: #1D272C; --char-ink: #E5EDEF; --char-edge: #0F1518;
+    --warn-bg: #45211A; --warn-ink: #F4BCAE; --warn-edge: #28120D;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #11171A; --surface: #1A2226; --ink: #E4ECEE; --muted: #97A8AF; --line: #2B373C;
-  --focus: #5DBEC6; --focus-soft: rgba(93, 190, 198, .22); --on-focus: #0E2226;
-  --ini-bg: #1D3350; --ini-ink: #A8CAEE; --med-bg: #1B3B2A; --med-ink: #A3DBBA;
-  --fin-bg: #403118; --fin-ink: #EFCB8F; --tone-bg: #31284A; --tone-ink: #CBBCEE;
-  --fn-bg: #232E33; --fn-ink: #C6D3D8; --warn-bg: #43221C; --warn-ink: #F1B3A6;
+  --paper: #0F1619; --panel: #182125; --ink: #E5EDEF; --muted: #A6B5BB; --line: #2C383D;
+  --focus: #5CC2CB; --focus-edge: #2E8790; --focus-soft: rgba(92, 194, 203, .24); --on-focus: #062326; --shadow: rgba(0, 0, 0, .55);
+  --ini-bg: #1B3250; --ini-ink: #B8D5F3; --ini-edge: #0E1D30;
+  --med-bg: #173A27; --med-ink: #AADEBD; --med-edge: #0B2116;
+  --fin-bg: #3E2E12; --fin-ink: #F1D199; --fin-edge: #241A08;
+  --tone-bg: #2C2346; --tone-ink: #D1C3F1; --tone-edge: #18122A;
+  --fn-bg: #222C31; --fn-ink: #CDD8DD; --fn-edge: #12191C;
+  --char-bg: #1D272C; --char-ink: #E5EDEF; --char-edge: #0F1518;
+  --warn-bg: #45211A; --warn-ink: #F4BCAE; --warn-edge: #28120D;
   color-scheme: dark;
 }
 
-html { height: 100%; box-sizing: border-box; }
+html { height: 100%; box-sizing: border-box; overscroll-behavior: none; }
 body {
-  height: 100%; margin: 0; overflow: hidden;
-  background: var(--bg); color: var(--ink); font-family: var(--font-ui);
-  touch-action: manipulation; -webkit-user-select: none; user-select: none;
-  -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;
+  height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none;
+  background: var(--paper); color: var(--ink); font-family: var(--font-ui);
 }
 button { font: inherit; color: inherit; }
 button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
@@ -80,62 +91,35 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   grid-template-columns: minmax(0, 1fr) var(--rail);
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-areas: "top top" "board rail";
+  touch-action: none; -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
 }
 @media (orientation: portrait) {
   .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "top" "board" "rail"; }
 }
 
-/* ---------- top band: output + syllable slots (rest zone) ---------- */
-.top { grid-area: top; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--gap); }
+/* ---------- typed words (also the cancel zone) ---------- */
+.top { grid-area: top; min-width: 0; display: grid; }
 .out {
-  min-width: 0; box-sizing: border-box; height: calc(clamp(96px, 17vh, 150px) * var(--scale));
-  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
-  padding: 6px 18px; overflow: hidden;
-  display: flex; flex-wrap: wrap; align-content: flex-end; align-items: flex-end; gap: 0 2px;
-  font-family: var(--font-board); font-size: calc(clamp(30px, 5.4vmin, 50px) * var(--scale)); line-height: 1.45;
+  min-width: 0; box-sizing: border-box;
+  height: calc(clamp(72px, 13vh, 128px) * var(--scale));
+  background: var(--panel); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 4px 18px; overflow: hidden;
+  display: flex; flex-wrap: wrap; align-content: flex-end; align-items: flex-end;
+  font-family: var(--font-board); font-size: calc(clamp(30px, 5.2vmin, 50px) * var(--scale)); line-height: 1.5;
 }
 .out .u { white-space: pre; }
-.out .zh { margin-right: .35em; color: var(--ini-ink); }
+.out .zh { margin-right: .3em; color: var(--ini-ink); }
 .out ruby { ruby-position: over; }
-.out rt { font-size: .3em; color: var(--muted); letter-spacing: .02em; }
-.out .ph { color: var(--muted); font-size: .5em; align-self: center; font-family: var(--font-ui); }
-.out .caret { width: 3px; height: 1.1em; margin-bottom: .2em; background: var(--focus); border-radius: 2px; opacity: .7; }
-
-.comp { display: grid; grid-template-columns: repeat(4, calc(clamp(58px, 8.2vmin, 86px) * var(--scale))) 44px; gap: 8px; }
-.slot {
-  display: grid; grid-template-rows: 1fr auto; place-items: center; box-sizing: border-box;
-  border: 2px dashed var(--line); border-radius: 16px; padding: 4px 0 6px; background: transparent;
+.out rt { font-size: .32em; color: var(--muted); letter-spacing: .02em; }
+.out .pre {
+  margin: 0 0 .14em .12em; padding: 0 .14em; border-radius: .18em; white-space: nowrap; line-height: 1.25;
+  background: var(--focus-soft); color: var(--ink); box-shadow: inset 0 -.09em 0 var(--focus);
 }
-.slot b { font-family: var(--font-board); font-weight: 400; font-size: calc(clamp(30px, 5.6vmin, 54px) * var(--scale)); line-height: 1; min-height: 1em; }
-.slot span { font-size: 13px; letter-spacing: .08em; color: var(--muted); }
-.slot.full { border-style: solid; }
-.slot.ini.full { background: var(--ini-bg); color: var(--ini-ink); border-color: transparent; }
-.slot.med.full { background: var(--med-bg); color: var(--med-ink); border-color: transparent; }
-.slot.fin.full { background: var(--fin-bg); color: var(--fin-ink); border-color: transparent; }
-.slot.tone.full { background: var(--tone-bg); color: var(--tone-ink); border-color: transparent; }
-.slot.now { border-color: var(--focus); border-style: solid; }
-.side { display: grid; grid-template-rows: auto 1fr; justify-items: center; gap: 10px; padding-top: 2px; }
-.gear {
-  position: relative; width: 44px; height: 44px; border-radius: 50%; border: 0; padding: 0;
-  background: transparent; color: var(--muted); display: grid; place-items: center; cursor: pointer;
-}
-.gear svg { width: 24px; height: 24px; }
-.gear::before {
-  content: ""; position: absolute; inset: 0; border-radius: 50%;
-  background: conic-gradient(var(--focus) calc(var(--hold, 0) * 360deg), transparent 0);
-  -webkit-mask: radial-gradient(circle, transparent 17px, #000 18px); mask: radial-gradient(circle, transparent 17px, #000 18px);
-}
-.camdot { width: 12px; height: 12px; border-radius: 50%; background: var(--line); }
-.camdot.on { background: #3E9B63; }
-.camdot.off { background: #C0704F; }
-.banner {
-  position: absolute; left: 14px; top: 10px; max-width: calc(100% - 40px);
-  background: var(--fn-bg); color: var(--fn-ink); border-radius: 12px; padding: 6px 12px;
-  font-size: 16px; line-height: 1.35; z-index: 2; pointer-events: none;
-}
-@media (max-width: 600px) {
-  .top { grid-template-columns: minmax(0, 1fr); }
-  .comp { grid-template-columns: repeat(4, minmax(0, 1fr)) 44px; }
+.out .ph { color: var(--muted); font-size: .5em; align-self: center; font-family: var(--font-ui); font-weight: 600; }
+.out .caret { width: 3px; height: 1.05em; margin: 0 0 .22em 3px; background: var(--focus); border-radius: 2px; }
+@media (max-width: 680px) {
+  .out { height: calc(clamp(64px, 11vh, 100px) * var(--scale)); padding: 4px 14px; }
 }
 
 /* ---------- board ---------- */
@@ -143,267 +127,268 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
   grid-area: board; min-height: 0; display: grid; gap: var(--gap);
   grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
   grid-template-rows: repeat(var(--rows, 2), minmax(0, 1fr));
+  padding-bottom: var(--edge);
 }
+.board[data-view="all"] { gap: clamp(6px, 1.1vmin, 10px); --edge: 4px; --radius: 16px; }
+
 .tile, .rbtn {
-  position: relative; box-sizing: border-box; min-width: 0; min-height: 0; overflow: hidden;
-  border: 2px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--ink);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .25em;
-  padding: 6px; cursor: pointer; transition: background-color .15s, border-color .15s, box-shadow .15s, opacity .2s;
+  --k-bg: var(--fn-bg); --k-ink: var(--fn-ink); --k-edge: var(--fn-edge);
+  position: relative; box-sizing: border-box; min-width: 0; min-height: 0; overflow: hidden; margin: 0;
+  border: 0; border-radius: var(--radius); padding: 4px;
+  background: var(--k-bg); color: var(--k-ink); box-shadow: 0 var(--edge) 0 var(--k-edge);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .12em;
+  cursor: pointer; touch-action: none;
+  transition: transform .07s ease-out, box-shadow .07s ease-out, background-color .12s, opacity .2s;
 }
 .tile { container-type: size; font-family: var(--font-board); }
-.tile.ini  { background: var(--ini-bg);  color: var(--ini-ink);  border-color: transparent; }
-.tile.med  { background: var(--med-bg);  color: var(--med-ink);  border-color: transparent; }
-.tile.fin  { background: var(--fin-bg);  color: var(--fin-ink);  border-color: transparent; }
-.tile.tone { background: var(--tone-bg); color: var(--tone-ink); border-color: transparent; }
-.tile.fn, .rbtn { background: var(--fn-bg); color: var(--fn-ink); border-color: transparent; }
-.tile.warn { background: var(--warn-bg); color: var(--warn-ink); border-color: transparent; }
-.tile.char { background: var(--surface); color: var(--ink); border-color: var(--line); }
-.tile.mix  { background: linear-gradient(135deg, var(--med-bg) 0 50%, var(--fin-bg) 50% 100%); color: var(--ink); border-color: transparent; }
-.tile:disabled { opacity: .26; filter: saturate(.35); cursor: default; }
-.tile .big { font-size: calc(64px * var(--scale)); line-height: 1.05; white-space: nowrap; }
-.tile .row { font-size: calc(40px * var(--scale)); white-space: nowrap; letter-spacing: .04em; }
-.tile .sub { font-family: var(--font-ui); font-size: calc(16px * var(--scale)); opacity: .82; white-space: nowrap; }
-.tile .lbl { font-size: calc(28px * var(--scale)); white-space: nowrap; }
-.tile .tm { font-weight: 400; color: var(--tone-ink); }
-.tile .m.off { opacity: .25; }
-.tile svg { width: calc(44px * var(--scale)); height: calc(44px * var(--scale)); }
-@supports (font-size: 1cqmin) {
-  .tile .big { font-size: min(calc(54cqmin * var(--scale)), calc(80cqw / var(--len, 1))); }
-  .tile .row { font-size: min(calc(40cqmin * var(--scale)), calc(86cqw / var(--len, 4))); }
-  .tile .lbl { font-size: min(calc(18cqmin * var(--scale)), calc(82cqw / var(--len, 3))); }
-  .tile .sub { font-size: calc(clamp(13px, 9cqmin, 22px) * var(--scale)); }
-  .tile svg { width: calc(26cqmin * var(--scale)); height: calc(26cqmin * var(--scale)); }
+.ini  { --k-bg: var(--ini-bg);  --k-ink: var(--ini-ink);  --k-edge: var(--ini-edge); }
+.med  { --k-bg: var(--med-bg);  --k-ink: var(--med-ink);  --k-edge: var(--med-edge); }
+.fin  { --k-bg: var(--fin-bg);  --k-ink: var(--fin-ink);  --k-edge: var(--fin-edge); }
+.tone { --k-bg: var(--tone-bg); --k-ink: var(--tone-ink); --k-edge: var(--tone-edge); }
+.char { --k-bg: var(--char-bg); --k-ink: var(--char-ink); --k-edge: var(--char-edge); }
+.warn { --k-bg: var(--warn-bg); --k-ink: var(--warn-ink); --k-edge: var(--warn-edge); }
+.tile.mix { background: linear-gradient(135deg, var(--med-bg) 0 50%, var(--fin-bg) 50% 100%); --k-ink: var(--ink); }
+
+/* glyphs fill the block: sizes follow the block's own height (cqh) and width (cqw) */
+.tile .big { font-size: 56px; line-height: 1.05; white-space: nowrap; }
+.tile .row { display: block; font-size: 38px; line-height: 1.1; white-space: nowrap; letter-spacing: .04em; }
+.tile .row .m.dim { opacity: .25; }
+.tile .lbl { font-size: 28px; line-height: 1.15; white-space: nowrap; }
+.tile .phr { font-size: 30px; line-height: 1.25; text-align: center; word-break: break-all; padding: 0 .15em; }
+.tile .sub { font-family: var(--font-ui); font-size: calc(17px * var(--scale)); font-weight: 700; opacity: .88; white-space: nowrap; }
+.tile .tm { font-weight: 400; }
+.tile svg, .rbtn svg { width: 40px; height: 40px; flex: none; }
+@supports (font-size: 1cqh) {
+  .tile .big { font-size: min(66cqh, calc(80cqw / var(--len, 1))); }
+  .tile:has(.sub) .big { font-size: min(48cqh, calc(82cqw / var(--len, 1))); }
+  .tile.char .big { font-size: min(62cqh, 82cqw); }
+  .tile.char:has(.sub) .big { font-size: min(52cqh, 82cqw); }
+  .tile .row { font-size: min(58cqh, calc(86cqw / var(--len, 4))); }
+  .tile:has(.sub) .row { font-size: min(40cqh, calc(86cqw / var(--len, 4))); }
+  .tile .lbl { font-size: min(calc(24cqh * var(--scale)), calc(84cqw / var(--len, 3))); }
+  .tile .phr { font-size: min(calc(26cqh * var(--scale)), calc(170cqw / var(--len, 4))); }
+  .tile .sub { font-size: calc(clamp(14px, 12cqh, 26px) * var(--scale)); }
+  .tile svg { width: 24cqh; height: 24cqh; }
 }
+/* tall blocks: a group of zhuyin wraps onto two lines so every symbol can be bigger */
+@container (max-aspect-ratio: 7/5) {
+  .tile .row.n3 { display: flex; flex-wrap: wrap; justify-content: center; letter-spacing: 0; line-height: 1.08; width: calc(var(--per, 2) * 1.12em); font-size: min(38cqh, calc(80cqw / var(--per, 2))); }
+  .tile .row.n3 > .m { flex: none; width: 1.12em; text-align: center; }
+}
+@container (max-aspect-ratio: 13/7) {
+  .tile .row.n4 { display: flex; flex-wrap: wrap; justify-content: center; letter-spacing: 0; line-height: 1.08; width: calc(var(--per, 2) * 1.12em); font-size: min(38cqh, calc(80cqw / var(--per, 2))); }
+  .tile .row.n4 > .m { flex: none; width: 1.12em; text-align: center; }
+}
+@container (max-aspect-ratio: 11/5) {
+  .tile .row.n5 { display: flex; flex-wrap: wrap; justify-content: center; letter-spacing: 0; line-height: 1.08; width: calc(var(--per, 3) * 1.12em); font-size: min(38cqh, calc(80cqw / var(--per, 3))); }
+  .tile .row.n5 > .m { flex: none; width: 1.12em; text-align: center; }
+  .tile:has(.sub) .row.n5 { font-size: min(27cqh, calc(80cqw / var(--per, 3))); }
+}
+
+/* finger on a block: it sinks and gets a ring that stays visible around the fingertip */
+.tile.is-touch, .rbtn.is-touch {
+  z-index: 2; transform: translateY(calc(var(--edge) - 2px));
+  box-shadow: 0 2px 0 var(--k-edge), 0 0 0 5px var(--paper), 0 0 0 11px var(--focus);
+}
+.tile.off, .rbtn.off { opacity: .3; filter: saturate(.25); box-shadow: none; cursor: default; }
+.tile.off.is-touch, .rbtn.off.is-touch { opacity: .5; transform: none; box-shadow: 0 0 0 5px var(--paper), 0 0 0 11px var(--muted); }
+.tile.picked, .rbtn.picked {
+  background: var(--focus); color: var(--on-focus);
+  box-shadow: 0 2px 0 var(--focus-edge); transform: translateY(calc(var(--edge) - 2px));
+}
+.tile.picked .sub, .tile.picked .m.dim { opacity: 1; }
 .fill { position: absolute; inset: 0; background: var(--focus-soft); transform-origin: 50% 100%; transform: scaleY(var(--p, 0)); pointer-events: none; }
 .tile > :not(.fill), .rbtn > :not(.fill) { position: relative; }
-.is-gaze { border-color: var(--focus) !important; box-shadow: 0 0 0 5px var(--focus-soft); }
-.tile.picked, .rbtn.picked { background: var(--focus); color: var(--on-focus); border-color: var(--focus); }
-.tile.picked .tm, .tile.picked .sub { color: inherit; }
+.tile.nope { animation: nope .3s; }
+@keyframes nope { 0%, 100% { translate: 0 0; } 25% { translate: -7px 0; } 75% { translate: 7px 0; } }
 
 /* ---------- rail ---------- */
-.rail { grid-area: rail; display: grid; gap: var(--gap); grid-template-rows: repeat(3, minmax(0, 1fr)); min-height: 0; }
-.rbtn { font-size: calc(22px * var(--scale)); font-family: var(--font-board); }
-.rbtn svg { width: calc(40px * var(--scale)); height: calc(40px * var(--scale)); }
-.rbtn:disabled { opacity: .35; cursor: default; }
+.rail { grid-area: rail; min-height: 0; display: grid; gap: var(--gap); grid-template-rows: 1fr 1.35fr 1fr; padding-bottom: var(--edge); }
+.rbtn { font-family: var(--font-board); font-size: calc(clamp(20px, 2.8vmin, 28px) * var(--scale)); line-height: 1.15; }
+.rbtn svg { width: calc(clamp(30px, 4.4vmin, 44px) * var(--scale)); height: calc(clamp(30px, 4.4vmin, 44px) * var(--scale)); }
+.rbtn.speak { --k-bg: var(--focus); --k-ink: var(--on-focus); --k-edge: var(--focus-edge); font-size: calc(clamp(22px, 3.2vmin, 32px) * var(--scale)); }
+.rbtn.on { --k-bg: var(--ink); --k-ink: var(--paper); --k-edge: var(--muted); }
 @media (orientation: portrait) {
-  .rail { grid-template-rows: none; grid-template-columns: repeat(3, minmax(0, 1fr)); height: calc(clamp(84px, 11vh, 124px) * var(--scale)); }
-  .rbtn { flex-direction: row; gap: .5em; }
+  .rail { grid-template-rows: none; grid-template-columns: 1fr 1.35fr 1fr; height: calc(clamp(80px, 10vh, 116px) * var(--scale)); }
+  .rbtn { flex-direction: row; gap: .45em; }
+}
+@media (orientation: portrait) and (max-width: 520px) {
+  .rbtn { flex-direction: column; gap: 2px; }
 }
 
-.cursor {
-  position: fixed; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; z-index: 80;
-  border-radius: 50%; border: 3px solid var(--focus); background: var(--focus-soft); pointer-events: none;
-  transform: translate3d(var(--x, -100px), var(--y, -100px), 0);
+/* ---------- preview bubble above the fingertip ---------- */
+.bubble {
+  position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; box-sizing: border-box;
+  min-width: 116px; max-width: min(86vw, 560px); min-height: 116px; padding: 12px 24px 18px;
+  display: grid; place-content: center; justify-items: center; gap: 4px; text-align: center;
+  background: var(--panel); color: var(--ink); border: 5px solid var(--focus); border-radius: 28px;
+  box-shadow: 0 14px 34px var(--shadow);
+  transform: translate3d(-999px, -999px, 0);
+}
+.bubble b { font-family: var(--font-board); font-weight: 400; font-size: 72px; line-height: 1.05; white-space: nowrap; }
+.bubble.long b { font-size: 44px; white-space: normal; }
+.bubble small { font-size: 18px; font-weight: 700; color: var(--muted); }
+.bubble.off { border-color: var(--line); }
+.bubble.off b { opacity: .45; }
+.bubble.holding::after {
+  content: ""; position: absolute; left: 16px; right: 16px; bottom: 7px; height: 6px; border-radius: 3px;
+  background: var(--focus); transform-origin: left center; transform: scaleX(var(--p, 0));
 }
 
-/* ---------- start / settings sheets ---------- */
+/* ---------- big text to show someone ---------- */
+.show {
+  position: fixed; inset: 0; z-index: 40; box-sizing: border-box;
+  display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: var(--gap);
+  background: var(--panel); color: var(--ink);
+  padding-block: calc(env(safe-area-inset-top, 0px) + var(--gap)) calc(env(safe-area-inset-bottom, 0px) + var(--gap));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+.show-text { min-height: 0; display: grid; place-items: center; overflow: hidden; }
+.show-text span { display: block; max-width: 100%; text-align: center; font-family: var(--font-board); line-height: 1.25; word-break: break-all; }
+.show-actions { display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--gap); height: calc(clamp(88px, 13vh, 128px) * var(--scale)); padding-bottom: var(--edge); }
+.show-actions .rbtn { flex-direction: row; gap: .5em; }
+
+.toast {
+  position: fixed; z-index: 95; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 14px); transform: translateX(-50%);
+  width: max-content; max-width: calc(100% - 32px); box-sizing: border-box;
+  background: var(--ink); color: var(--paper); border-radius: 14px; padding: 12px 20px;
+  font-size: 18px; font-weight: 700; line-height: 1.4; box-shadow: 0 8px 24px var(--shadow);
+}
+
+/* ---------- settings (for family and caregivers) ---------- */
 .sheet {
-  position: fixed; inset: 0; z-index: 50; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  background: var(--bg); -webkit-user-select: text; user-select: text;
-  padding-block: calc(env(safe-area-inset-top, 0px) + 28px) calc(env(safe-area-inset-bottom, 0px) + 40px);
+  position: fixed; inset: 0; z-index: 60; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  background: var(--paper); color: var(--ink); touch-action: pan-y; -webkit-user-select: text; user-select: text;
+  padding-block: calc(env(safe-area-inset-top, 0px) + 20px) calc(env(safe-area-inset-bottom, 0px) + 40px);
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-.sheet-in { max-width: 720px; margin: 0 auto; display: grid; gap: 22px; }
-.brand { display: grid; gap: 8px; }
-.brand h1 { margin: 0; font-family: var(--font-board); font-weight: 400; font-size: clamp(40px, 7vw, 64px); line-height: 1.1; text-wrap: balance; }
-.brand h1 .bpmf { color: var(--focus); }
-.brand p { margin: 0; font-size: 19px; line-height: 1.6; color: var(--muted); max-width: 34em; }
-.demo { display: flex; gap: 10px; flex-wrap: wrap; }
-.demo span { font-family: var(--font-board); font-size: 30px; width: 58px; height: 58px; display: grid; place-items: center; border-radius: 14px; }
-.demo .i { background: var(--ini-bg); color: var(--ini-ink); }
-.demo .m { background: var(--med-bg); color: var(--med-ink); }
-.demo .f { background: var(--fin-bg); color: var(--fin-ink); }
-.demo .t { background: var(--tone-bg); color: var(--tone-ink); }
-.demo .eq { background: transparent; color: var(--muted); width: 28px; }
-.demo .c { background: var(--surface); border: 2px solid var(--line); }
+.sheet-in { max-width: 720px; margin: 0 auto; display: grid; gap: 18px; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.sheet-head h1 { margin: 0; font-family: var(--font-board); font-weight: 400; font-size: 34px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; display: grid; gap: 14px; }
+.card h2 { margin: 0; font-size: 21px; letter-spacing: .02em; }
+.note { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
+.field { display: grid; gap: 8px; }
+.field > .name { font-size: 16px; font-weight: 700; color: var(--muted); letter-spacing: .03em; }
+.choices { display: grid; gap: 10px; }
+.choices.inline { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+.choice {
+  display: flex; gap: 12px; align-items: flex-start; box-sizing: border-box; min-height: 56px;
+  border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; cursor: pointer;
+  font-size: 18px; font-weight: 700; line-height: 1.45;
+}
+.choice:has(input:checked) { border-color: var(--focus); background: var(--focus-soft); }
+.choice input { margin: 3px 0 0; width: 24px; height: 24px; accent-color: var(--focus); flex: none; }
+.choice small { display: block; color: var(--muted); font-size: 16px; font-weight: 400; margin-top: 2px; }
+.toggle { display: flex; gap: 12px; align-items: center; min-height: 48px; font-size: 18px; line-height: 1.4; cursor: pointer; }
+.toggle input { width: 26px; height: 26px; accent-color: var(--focus); flex: none; }
+.range { display: grid; grid-template-columns: minmax(0, 1fr) 6em; gap: 14px; align-items: center; }
+.range input { width: 100%; height: 40px; accent-color: var(--focus); }
+.range output { font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 700; text-align: right; }
+textarea {
+  width: 100%; box-sizing: border-box; min-height: 10em; border-radius: 12px; border: 2px solid var(--line);
+  background: var(--paper); color: var(--ink); padding: 12px 14px; font: 20px/1.6 var(--font-board); resize: vertical;
+}
 .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .btn {
-  border: 0; border-radius: 16px; padding: 16px 28px; font-size: 20px; cursor: pointer;
-  background: var(--fn-bg); color: var(--fn-ink); font-family: var(--font-ui);
+  border: 0; border-radius: 14px; min-height: 52px; padding: 0 26px; cursor: pointer;
+  background: var(--fn-bg); color: var(--fn-ink); font: 700 19px var(--font-ui);
 }
-.btn.primary { background: var(--focus); color: var(--on-focus); font-size: 24px; padding: 18px 44px; font-family: var(--font-board); }
-.btn.small { padding: 10px 18px; font-size: 17px; }
+.btn.primary { background: var(--focus); color: var(--on-focus); }
 .chip { font-size: 16px; color: var(--muted); }
-.chip b { color: var(--ink); font-weight: 600; }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; display: grid; gap: 12px; }
-.card h2 { margin: 0; font-size: 19px; letter-spacing: .02em; }
-.card p, .card li { margin: 0; font-size: 16px; line-height: 1.65; color: var(--ink); }
-.card ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
-.card .note { color: var(--muted); font-size: 15px; }
-.path { font-weight: 600; white-space: nowrap; }
 
-.field { display: grid; gap: 8px; }
-.field > .name { font-size: 15px; font-weight: 600; color: var(--muted); letter-spacing: .04em; }
-.choices { display: grid; gap: 8px; }
-.choices.inline { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
-.choice { display: flex; gap: 12px; align-items: flex-start; border: 2px solid var(--line); border-radius: 14px; padding: 12px 14px; cursor: pointer; font-size: 17px; line-height: 1.45; }
-.choice:has(input:checked) { border-color: var(--focus); background: var(--focus-soft); }
-.choice input { margin-top: 4px; width: 20px; height: 20px; accent-color: var(--focus); flex: none; }
-.choice small { display: block; color: var(--muted); font-size: 14.5px; margin-top: 2px; }
-.toggle { display: flex; gap: 12px; align-items: center; font-size: 17px; cursor: pointer; }
-.toggle input { width: 22px; height: 22px; accent-color: var(--focus); flex: none; }
-.range { display: grid; grid-template-columns: minmax(0, 1fr) 5.5em; gap: 12px; align-items: center; }
-.range input { width: 100%; accent-color: var(--focus); }
-.range output { font-variant-numeric: tabular-nums; font-size: 18px; text-align: right; }
-textarea { width: 100%; box-sizing: border-box; min-height: 9.5em; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); padding: 10px 12px; font: 18px/1.6 var(--font-board); resize: vertical; }
-.sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; position: sticky; top: calc(-28px - env(safe-area-inset-top, 0px)); background: var(--bg); padding-block: 6px; z-index: 1; }
-.sheet-head h1 { margin: 0; font-size: 28px; font-family: var(--font-board); font-weight: 400; }
-
-/* ---------- calibration (built by gaze.js) ---------- */
-.calib { position: fixed; inset: 0; z-index: 60; background: var(--bg); }
-.calib-card {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100% - 32px));
-  background: var(--surface); border-radius: 22px; border: 1px solid var(--line); padding: 22px; box-sizing: border-box;
-  display: grid; gap: 14px; justify-items: center; text-align: center;
-}
-.calib-card h2 { margin: 0; font-family: var(--font-board); font-weight: 400; font-size: 30px; }
-.calib-card p { margin: 0; font-size: 18px; line-height: 1.6; color: var(--muted); }
-.calib-card canvas { width: 240px; height: 180px; border-radius: 14px; background: #0B1214; }
-.calib-card .actions { justify-content: center; }
-.quality { font-size: 20px; padding: 6px 16px; border-radius: 999px; }
-.quality.good { background: var(--med-bg); color: var(--med-ink); }
-.quality.ok { background: var(--fin-bg); color: var(--fin-ink); }
-.quality.bad { background: var(--warn-bg); color: var(--warn-ink); }
-.calib-dot { position: absolute; width: 120px; height: 120px; margin: -60px 0 0 -60px; transition: left .7s ease-in-out, top .7s ease-in-out; pointer-events: none; }
-.calib-dot i { position: absolute; inset: 0; border-radius: 50%; border: 6px solid var(--focus); transform: scale(1); }
-.calib-dot b { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: #E9A93B; box-shadow: 0 0 0 6px rgba(233, 169, 59, .28); }
-.calib-dot.shrink i { transform: scale(.22); transition: transform var(--t, 1.1s) linear; }
-
-/* ---------- calm mode & reduced motion ---------- */
-.calm .tile.ini  { background: color-mix(in srgb, var(--ini-bg) 40%, var(--surface)); }
-.calm .tile.med  { background: color-mix(in srgb, var(--med-bg) 40%, var(--surface)); }
-.calm .tile.fin  { background: color-mix(in srgb, var(--fin-bg) 40%, var(--surface)); }
-.calm .tile.tone { background: color-mix(in srgb, var(--tone-bg) 40%, var(--surface)); }
-.calm .tile.mix  { background: var(--surface); }
-.calm *, .calm *::before { transition: none !important; }
+body.calm .tile, body.calm .rbtn { transition: none; }
+body.calm .board { filter: saturate(.55); }
+body.calm .tile.nope { animation: none; }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before { transition: none !important; }
-  .calib-dot { transition: left .25s linear, top .25s linear !important; }
-  .calib-dot.shrink i { transition: transform var(--t, 1.1s) linear !important; }
+  .tile, .rbtn { transition: none; }
+  .tile.nope { animation: none; }
 }
 </style>
 
 <div class="app" id="app">
   <header class="top">
     <div class="out" id="out" aria-live="polite" aria-label="打出來的字"></div>
-    <div class="comp" id="comp" aria-label="正在拼的音">
-      <div class="slot ini"><b></b><span>聲母</span></div>
-      <div class="slot med"><b></b><span>介音</span></div>
-      <div class="slot fin"><b></b><span>韻母</span></div>
-      <div class="slot tone"><b></b><span>聲調</span></div>
-      <div class="side">
-        <button class="gear" id="gear" type="button" aria-label="家長設定（按住一秒）">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-        </button>
-        <span class="camdot" id="camdot" hidden></span>
-      </div>
-    </div>
-    <div class="banner" id="banner" hidden></div>
   </header>
-
   <main class="board" id="board" aria-label="注音鍵盤"></main>
-
-  <nav class="rail" id="rail" aria-label="功能鍵">
-    <button class="rbtn" type="button" data-target data-rail="back" data-repeat aria-label="退回一步">
-      <span class="fill" aria-hidden="true"></span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+  <nav class="rail" id="rail" aria-label="常用按鍵">
+    <button class="rbtn" type="button" data-rail="back" data-target data-say="退回" aria-label="退回">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m16 9-6 6"/><path d="m10 9 6 6"/></svg>
       <span>退回</span>
     </button>
-    <button class="rbtn" type="button" data-target data-rail="speak" aria-label="把字唸出來">
-      <span class="fill" aria-hidden="true"></span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>
+    <button class="rbtn speak" type="button" data-rail="speak" data-target data-say="唸出來" aria-label="唸出來">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
       <span>唸出來</span>
     </button>
-    <button class="rbtn" type="button" data-target data-rail="menu" aria-label="更多：標點、常用句、休息">
-      <span class="fill" aria-hidden="true"></span>
-      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+    <button class="rbtn" type="button" data-rail="menu" data-target data-say="更多" aria-label="更多">
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2.3"/><circle cx="12" cy="12" r="2.3"/><circle cx="19" cy="12" r="2.3"/></svg>
       <span>更多</span>
     </button>
   </nav>
 </div>
 
-<div class="cursor" id="cursor" hidden></div>
+<div class="bubble" id="bubble" hidden aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" hidden></div>
 
-<section class="sheet" id="start" aria-label="開始">
-  <div class="sheet-in">
-    <div class="brand">
-      <h1>眼睛<span class="bpmf">注音</span>板</h1>
-      <p>看著格子停一下，就能選注音、拼字、讓 iPad 唸出來。照「聲母 → 介音 → 韻母 → 聲調」一步一步拼，每一步最多 8 個大格子。</p>
-    </div>
-    <div class="demo" aria-hidden="true">
-      <span class="i">ㄇ</span><span class="f">ㄚ</span><span class="t">ˇ</span><span class="eq">→</span><span class="c">馬</span>
-    </div>
-    <div class="actions">
-      <button class="btn primary" id="startBtn" type="button">開始</button>
-      <button class="btn" id="startSettings" type="button">家長設定</button>
-      <span class="chip">輸入方式：<b id="modeName"></b></span>
-    </div>
-    <div class="card">
-      <h2>第一次使用：打開 iPad 內建的眼動追蹤</h2>
-      <ol>
-        <li>打開 <span class="path">設定 › 輔助使用 › 眼動追蹤</span>，開啟後跟著畫面上的圓點做校正。</li>
-        <li>確認同一頁的「停留控制」是開啟的：眼睛停在一個格子上，iPad 就會幫你點一下。</li>
-        <li>iPad 放在穩定的桌面或支架上，距離臉大約 30–45 公分，臉在畫面中間。</li>
-      </ol>
-      <p class="note">這個網頁只需要收到「點一下」，所以 iPad 內建眼動追蹤、觸控、外接開關都能用。在家長設定可以改成「游標停留」或「本程式相機眼控」。</p>
-    </div>
-    <div class="card">
-      <h2>給孩子的小提醒</h2>
-      <ol>
-        <li>先用手指點幾次，熟悉格子在哪裡，再換成眼睛。</li>
-        <li>上面打字的地方可以放心看，不會選到東西。</li>
-        <li>累了就按「更多 › 休息」，一次練 5–10 分鐘就很好。</li>
-      </ol>
-    </div>
+<section class="show" id="show" hidden aria-label="大字">
+  <div class="show-text" id="showText"><span id="showInner"></span></div>
+  <div class="show-actions">
+    <button class="rbtn speak" type="button" data-show="speak" data-target data-say="唸出來" aria-label="唸出來">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      <span>唸出來</span>
+    </button>
+    <button class="rbtn" type="button" data-show="close" data-target data-say="回去打字" aria-label="回去打字">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m11 6-6 6 6 6"/></svg>
+      <span>回去打字</span>
+    </button>
   </div>
 </section>
 
-<section class="sheet" id="settings" aria-label="家長設定" hidden>
+<section class="sheet" id="settings" hidden aria-label="設定">
   <div class="sheet-in">
     <div class="sheet-head">
-      <h1>家長設定</h1>
-      <button class="btn primary" id="settingsDone" type="button">回到鍵盤</button>
+      <h1>設定</h1>
+      <button class="btn primary" type="button" data-close-settings>完成</button>
     </div>
 
     <div class="card">
-      <h2>輸入方式</h2>
-      <div class="choices">
-        <label class="choice"><input type="radio" name="input" value="tap" data-set="input" id="in-tap"><span>觸控／iPad 內建眼動追蹤<small>由 iPad 的「停留控制」幫忙點按。最穩定，推薦先用這個。</small></span></label>
-        <label class="choice"><input type="radio" name="input" value="hover" data-set="input" id="in-hover"><span>游標停留<small>滑鼠、頭控滑鼠或會移動游標的裝置：游標停在格子上，就會選取。</small></span></label>
-        <label class="choice"><input type="radio" name="input" value="camera" data-set="input" id="in-camera"><span>本程式相機眼控<small>用前鏡頭追蹤眼睛或頭部，要先校正。只能在自己架設的 https 網址使用，Claude 預覽頁面不能開相機。</small></span></label>
+      <h2>怎樣才算選到</h2>
+      <div class="choices" role="radiogroup" aria-label="選取方式">
+        <label class="choice"><input type="radio" name="press" value="lift" data-set="press" id="pr-lift"><span>放開才選<small>手指先放上去，滑到想要的格子再放開。點偏了不用重來，滑過去就好。</small></span></label>
+        <label class="choice"><input type="radio" name="press" value="hold" data-set="press" id="pr-hold"><span>按住才選<small>手指停在格子上一會兒才算。不小心碰到、劃過去都不會選到。</small></span></label>
+        <label class="choice"><input type="radio" name="press" value="down" data-set="press" id="pr-down"><span>一碰就選<small>以第一下碰到的格子為準，手指之後滑走也沒關係。</small></span></label>
+      </div>
+      <div class="field" id="holdField">
+        <span class="name">要按住多久</span>
+        <div class="range"><input type="range" min="0.3" max="2" step="0.1" data-set="holdTime" id="set-hold" aria-label="要按住多久"><output id="out-hold"></output></div>
       </div>
       <div class="field">
-        <span class="name">停留多久才選取（游標停留、相機眼控）</span>
-        <div class="range"><input type="range" min="0.6" max="3" step="0.1" data-set="dwell" id="set-dwell"><output id="out-dwell"></output></div>
+        <span class="name">防止手抖連按</span>
+        <div class="range"><input type="range" min="0" max="1.5" step="0.1" data-set="guard" id="set-guard" aria-label="防止手抖連按"><output id="out-guard"></output></div>
+        <p class="note">選到一格之後，這段時間內再碰到都不算。</p>
       </div>
+      <label class="toggle"><input type="checkbox" data-set="bubble" id="set-bubble">手指按著時，在手指上方放大顯示正要選的</label>
     </div>
 
-    <div class="card" id="camCard">
-      <h2>相機眼控</h2>
+    <div class="card">
+      <h2>按鍵與字的大小</h2>
       <div class="field">
-        <span class="name">追蹤方式</span>
-        <div class="choices inline">
-          <label class="choice"><input type="radio" name="camMode" value="eyes" data-set="camMode" id="cm-eyes"><span>看眼睛</span></label>
-          <label class="choice"><input type="radio" name="camMode" value="head" data-set="camMode" id="cm-head"><span>看頭部轉向</span></label>
+        <span class="name">注音鍵盤</span>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="layout" value="big" data-set="layout" id="ly-big"><span>大格，分兩步選<small>一頁最多 8 格，先選一組再選一個，最好按。</small></span></label>
+          <label class="choice"><input type="radio" name="layout" value="all" data-set="layout" id="ly-all"><span>一頁看到全部注音<small>按得比較快，但格子比較小，適合手指比較準的人。</small></span></label>
         </div>
       </div>
       <div class="field">
-        <span class="name">游標穩定度</span>
+        <span class="name">文字大小</span>
         <div class="choices inline">
-          <label class="choice"><input type="radio" name="smooth" value="0" data-set="smooth" id="sm-0"><span>靈敏</span></label>
-          <label class="choice"><input type="radio" name="smooth" value="1" data-set="smooth" id="sm-1"><span>標準</span></label>
-          <label class="choice"><input type="radio" name="smooth" value="2" data-set="smooth" id="sm-2"><span>穩定</span></label>
+          <label class="choice"><input type="radio" name="size" value="1" data-set="size" id="sz-m"><span>標準</span></label>
+          <label class="choice"><input type="radio" name="size" value="1.12" data-set="size" id="sz-l"><span>大</span></label>
+          <label class="choice"><input type="radio" name="size" value="1.25" data-set="size" id="sz-xl"><span>特大</span></label>
         </div>
       </div>
-      <div class="field">
-        <span class="name">校正點數</span>
-        <div class="choices inline">
-          <label class="choice"><input type="radio" name="calibPoints" value="5" data-set="calibPoints" id="cp-5"><span>5 點（較快）</span></label>
-          <label class="choice"><input type="radio" name="calibPoints" value="9" data-set="calibPoints" id="cp-9"><span>9 點（較準）</span></label>
-        </div>
-      </div>
-      <label class="toggle"><input type="checkbox" data-set="cursor" id="set-cursor">顯示眼睛看的位置（圓圈）<small class="note">&nbsp;不建議：有偏差時孩子容易追著圓圈跑</small></label>
-      <div class="actions"><button class="btn" id="recalib" type="button">重新校正</button><span class="chip" id="camState"></span></div>
+      <label class="toggle"><input type="checkbox" data-set="calm" id="set-calm">低刺激：顏色變淡、沒有動畫</label>
     </div>
 
     <div class="card">
@@ -411,62 +396,692 @@ textarea { width: 100%; box-sizing: border-box; min-height: 9.5em; border-radius
       <div class="field">
         <span class="name">打出來的是</span>
         <div class="choices inline">
-          <label class="choice"><input type="radio" name="output" value="hanzi" data-set="output" id="op-hanzi"><span>國字（拼完選字）</span></label>
+          <label class="choice"><input type="radio" name="output" value="hanzi" data-set="output" id="op-hanzi"><span>國字</span></label>
           <label class="choice"><input type="radio" name="output" value="zhuyin" data-set="output" id="op-zhuyin"><span>只打注音</span></label>
         </div>
       </div>
-      <label class="toggle"><input type="checkbox" data-set="assist" id="set-assist">拼音輔助：拼不出來的符號會變淡、不能選</label>
-      <label class="toggle"><input type="checkbox" data-set="predict" id="set-predict">選字後，提示下一個可能的字</label>
-      <label class="toggle"><input type="checkbox" data-set="ruby" id="set-ruby">國字上面顯示注音</label>
+      <label class="toggle"><input type="checkbox" data-set="assist" id="set-assist">拼不出字的注音先變淡、按了也不會選</label>
+      <label class="toggle"><input type="checkbox" data-set="ruby" id="set-ruby">國字上方顯示注音</label>
+      <label class="toggle"><input type="checkbox" data-set="predict" id="set-predict">選完一個字，先猜下一個字</label>
     </div>
 
     <div class="card">
       <h2>聲音</h2>
-      <label class="toggle"><input type="checkbox" data-set="speakKeys" id="set-speakKeys">選到注音符號和聲調時唸出來</label>
-      <label class="toggle"><input type="checkbox" data-set="speakChars" id="set-speakChars">選到國字時唸出來</label>
-      <label class="toggle"><input type="checkbox" data-set="sound" id="set-sound">選取時的輕提示音</label>
+      <label class="toggle"><input type="checkbox" data-set="speakKeys" id="set-speakKeys">選注音時唸出來</label>
+      <label class="toggle"><input type="checkbox" data-set="speakChars" id="set-speakChars">選字時唸出來</label>
+      <label class="toggle"><input type="checkbox" data-set="sound" id="set-sound">選到時發出提示音</label>
       <div class="field">
         <span class="name">說話速度</span>
-        <div class="range"><input type="range" min="0.5" max="1.3" step="0.05" data-set="rate" id="set-rate"><output id="out-rate"></output></div>
+        <div class="range"><input type="range" min="0.5" max="1.3" step="0.05" data-set="rate" id="set-rate" aria-label="說話速度"><output id="out-rate"></output></div>
       </div>
-    </div>
-
-    <div class="card">
-      <h2>畫面</h2>
-      <div class="field">
-        <span class="name">字的大小</span>
-        <div class="choices inline">
-          <label class="choice"><input type="radio" name="size" value="0.88" data-set="size" id="sz-s"><span>小</span></label>
-          <label class="choice"><input type="radio" name="size" value="1" data-set="size" id="sz-m"><span>中</span></label>
-          <label class="choice"><input type="radio" name="size" value="1.12" data-set="size" id="sz-l"><span>大</span></label>
-        </div>
-      </div>
-      <label class="toggle"><input type="checkbox" data-set="calm" id="set-calm">低刺激：顏色變淡、沒有動畫</label>
+      <div class="actions"><button class="btn" id="testVoice" type="button">試聽</button></div>
     </div>
 
     <div class="card">
       <h2>常用句</h2>
-      <p class="note">一行一句，最多 8 句。在鍵盤按「更多 › 常用句」就會出現，選到會直接唸出來。</p>
-      <textarea data-set="phrases" id="set-phrases" rows="8" spellcheck="false"></textarea>
+      <p class="note">一行一句，最多 12 句。在首頁或「更多」裡按「常用句」就會出現，選到會直接唸出來。</p>
+      <textarea data-set="phrases" id="set-phrases" rows="8" spellcheck="false" aria-label="常用句"></textarea>
     </div>
 
     <div class="card">
-      <h2>離線使用</h2>
-      <p id="offlineState">檢查中…</p>
-      <p class="note">要離線使用：把程式放到自己的 https 網址，用 Safari 打開後選「分享 › 加入主畫面」，連著網路打開一次，等這裡顯示「已可以離線使用」。之後從主畫面圖示打開，沒有網路也能用。</p>
+      <h2>打出來的字</h2>
+      <p class="note">只存在這台裝置的瀏覽器裡，不會上傳。</p>
+      <div class="actions"><button class="btn" id="copyText" type="button">複製</button><button class="btn" id="wipeText" type="button">清除</button><span class="chip" id="textNote"></span></div>
     </div>
 
-    <div class="card">
-      <h2>打字紀錄</h2>
-      <p class="note">打出來的字只存在這台 iPad 的瀏覽器裡，不會上傳。</p>
-      <div class="actions"><button class="btn" id="copyText" type="button">複製打出來的字</button><button class="btn" id="wipeText" type="button">清除打出來的字</button><span class="chip" id="textNote"></span></div>
-    </div>
+    <div class="actions"><button class="btn primary" type="button" data-close-settings>完成</button></div>
   </div>
 </section>
 
 <script src="data/zhuyin-dict.js"></script>
-<script src="gaze.js"></script>
-<script src="app.js"></script>
+<script>
+/* 注音溝通板 — 給手指沒力、點不準的人用：放開才選、可以滑動修正、縫隙就近吸附、防手抖連按 */
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+// ---------- 注音符號 ----------
+const INITIALS = 'ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ';
+const MEDIALS = 'ㄧㄨㄩ';
+const FINALS = 'ㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ';
+const ALL_SYMBOLS = [...INITIALS, ...MEDIALS, ...FINALS];
+const INITIAL_GROUPS = ['ㄅㄆㄇㄈ', 'ㄉㄊㄋㄌ', 'ㄍㄎㄏ', 'ㄐㄑㄒ', 'ㄓㄔㄕㄖ', 'ㄗㄘㄙ'];
+const FINAL_GROUPS = ['ㄚㄛㄜㄝ', 'ㄞㄟㄠㄡ', 'ㄢㄣㄤㄥㄦ'];
+const TONES = [
+  { mark: '', glyph: 'ˉ', name: '一聲' },
+  { mark: 'ˊ', glyph: 'ˊ', name: '二聲' },
+  { mark: 'ˇ', glyph: 'ˇ', name: '三聲' },
+  { mark: 'ˋ', glyph: 'ˋ', name: '四聲' },
+  { mark: '˙', glyph: '˙', name: '輕聲' },
+];
+// 唸注音符號時借用的同音字：語音引擎對單獨的注音符號不一定唸得準
+const SAY = {
+  ㄅ: '玻', ㄆ: '坡', ㄇ: '摸', ㄈ: '佛', ㄉ: '得', ㄊ: '特', ㄋ: '訥', ㄌ: '勒', ㄍ: '哥', ㄎ: '科', ㄏ: '喝',
+  ㄐ: '基', ㄑ: '七', ㄒ: '西', ㄓ: '知', ㄔ: '吃', ㄕ: '詩', ㄖ: '日', ㄗ: '資', ㄘ: '雌', ㄙ: '思',
+  ㄧ: '衣', ㄨ: '屋', ㄩ: '迂', ㄚ: '啊', ㄛ: '喔', ㄜ: '鵝', ㄝ: '欸', ㄞ: '哀', ㄟ: '誒', ㄠ: '凹', ㄡ: '歐',
+  ㄢ: '安', ㄣ: '恩', ㄤ: '骯', ㄥ: '鞥', ㄦ: '兒',
+};
+const kindOf = s => INITIALS.includes(s) ? 'ini' : MEDIALS.includes(s) ? 'med' : FINALS.includes(s) ? 'fin' : '';
+
+const ICON = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>',
+  space: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h16v-4"/></svg>',
+  pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>',
+  big: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M12 4v16"/><path d="M9 20h6"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>',
+};
+
+// ---------- 字典 ----------
+const DICT = window.ZHUYIN_DICT || { chars: {}, next: {}, word: {} };
+DICT.next = DICT.next || {}; DICT.word = DICT.word || {};
+const HAS_DICT = Object.keys(DICT.chars || {}).length > 0;
+const TONE_MARKS = 'ˊˇˋ˙';
+const splitKey = k => TONE_MARKS.includes(k.slice(-1)) ? [k.slice(0, -1), k.slice(-1)] : [k, ''];
+const fmtSyl = (base, mark) => mark === '˙' ? '˙' + base : base + mark;
+const fmtKey = key => fmtSyl(...splitKey(key));
+const BASES = new Map();   // 音節（不含聲調）→ 有字的聲調
+const PREFIX = new Set();  // 所有合法音節的開頭，用來判斷下一個符號拼不拼得出來
+const READING = new Map(); // 字 → 最常用的讀音
+for (const [key, s] of Object.entries(DICT.chars || {})) {
+  const [b, t] = splitKey(key);
+  if (!BASES.has(b)) BASES.set(b, new Set());
+  BASES.get(b).add(t);
+  for (let i = 1; i <= b.length; i++) PREFIX.add(b.slice(0, i));
+  [...s].forEach((ch, rank) => { const r = READING.get(ch); if (!r || rank < r.rank) READING.set(ch, { key, rank }); });
+}
+const charsFor = key => [...((DICT.chars || {})[key] || '')];
+const sayKey = key => charsFor(key)[0] || fmtKey(key);
+
+// ---------- 設定 ----------
+const DEFAULT_PHRASES = ['我要喝水', '我想上廁所', '我會痛', '我想休息', '我肚子餓', '請幫我', '不要', '謝謝'];
+const DEFAULTS = {
+  press: 'lift', holdTime: 0.6, guard: 0.4, bubble: true,
+  layout: 'big', size: 1, calm: false,
+  output: 'hanzi', assist: true, ruby: true, predict: false,
+  speakKeys: true, speakChars: true, sound: true, rate: 0.85,
+  phrases: DEFAULT_PHRASES,
+};
+const STORE = 'zhuyin-board:v1';
+const stored = (() => { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch { return {}; } })();
+const cfg = Object.assign({}, DEFAULTS, stored.settings || {});
+if (!Array.isArray(cfg.phrases)) cfg.phrases = DEFAULT_PHRASES.slice();
+
+// ---------- 狀態 ----------
+const S = {
+  view: 'home', group: '', page: 0, tone: null, lastChar: '',
+  comp: { ini: '', med: '', fin: '' },
+  text: Array.isArray(stored.text) ? stored.text.slice(-400) : [],
+};
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ settings: cfg, text: S.text })); } catch { /* 私密瀏覽等情況：不存也能用 */ } };
+let current = []; // 目前畫面上的格子
+const base = () => S.comp.ini + S.comp.med + S.comp.fin;
+const assistOn = () => cfg.assist && HAS_DICT;
+const ok = s => !assistOn() || PREFIX.has(base() + s);   // 大格：接在後面拼不拼得出來
+function validNext(s) {                                    // 一頁全部：可以直接換掉同一類的符號
+  const k = kindOf(s), c = S.comp;
+  if (k === 'ini') return !c.med && !c.fin && (!assistOn() || PREFIX.has(s));
+  if (k === 'med') return !c.fin && (!assistOn() || PREFIX.has(c.ini + s));
+  return !assistOn() || PREFIX.has(c.ini + c.med + s);
+}
+const canPick = s => cfg.layout === 'all' ? validNext(s) : ok(s);
+const canFinish = () => !!base() && (!assistOn() || BASES.has(base()));
+function composeView() { const c = S.comp; if (cfg.layout === 'all') return 'all'; return c.med ? 'f' : c.ini ? 'mf' : 'home'; }
+const stageView = () => S.comp.fin ? 'tone' : composeView();
+const resetComp = () => { S.comp = { ini: '', med: '', fin: '' }; S.tone = null; };
+
+// ---------- 格子 ----------
+const rowHTML = (symbols, valid = () => true) => {
+  const n = symbols.length;
+  return `<span class="row n${n}" style="--len:${n};--per:${Math.ceil(n / 2)}">${symbols.map(s => `<span class="m${valid(s) ? '' : ' dim'}">${s}</span>`).join('')}</span>`;
+};
+function symTile(s, enabled = true) {
+  return { kind: kindOf(s), peek: s, off: !enabled, aria: enabled ? s : `${s}（拼不出字）`, html: `<span class="big">${s}</span>`, act: () => pickSymbol(s) };
+}
+function groupTile(g, kind, act, valid = () => true) {
+  const members = [...g];
+  return { kind, off: !members.some(valid), act, peek: g, aria: `${members.join('、')}這一組`, html: rowHTML(members, valid) };
+}
+function doneTile() {
+  return { kind: 'tone', off: !canFinish(), peek: '拼好了', aria: '拼好了，選聲調', html: `${ICON.check}<span class="lbl" style="--len:3">拼好了</span>`, act: () => go('tone') };
+}
+function fnTile(html, label, act, extra = {}) { return Object.assign({ kind: 'fn', html, aria: label, peek: label, act }, extra); }
+function charTile(ch, key, onPick) {
+  const hint = DICT.word[ch] || '';
+  return {
+    kind: 'char', peek: ch, note: hint, aria: hint ? `${ch}，${hint}的${ch}` : ch, act: () => onPick(ch, key),
+    html: `<span class="big">${esc(ch)}</span>${hint ? `<span class="sub">${esc(hint)}</span>` : ''}`,
+  };
+}
+function phraseTile(p) {
+  return { kind: 'fn', peek: p, aria: p, html: `<span class="phr" style="--len:${Math.max(2, [...p].length)}">${esc(p)}</span>`, act: () => pickPhrase(p) };
+}
+const phrasesTile = () => fnTile(`${ICON.chat}<span class="lbl" style="--len:3">常用句</span>`, '常用句', () => go('phrases'));
+const perPage = () => cfg.layout === 'all' ? 11 : 7;
+function paged(list, make, moreLabel) {
+  const per = perPage();
+  if (list.length <= per + 1) return list.map(make);
+  const pages = Math.ceil(list.length / per);
+  S.page = clamp(S.page, 0, pages - 1);
+  const tiles = list.slice(S.page * per, S.page * per + per).map(make);
+  while (tiles.length < per) tiles.push(null);
+  const last = S.page >= pages - 1;
+  tiles.push(fnTile(`${ICON.next}<span class="sub">${last ? '回第一頁' : `${moreLabel} ${S.page + 1}/${pages}`}</span>`,
+    last ? '回第一頁' : moreLabel, () => { S.page = last ? 0 : S.page + 1; render(); }));
+  return tiles;
+}
+
+function buildTiles() {
+  const b = base();
+  switch (S.view) {
+    case 'home': return [
+      ...INITIAL_GROUPS.map(g => groupTile(g, 'ini', () => go('group', g))),
+      { kind: 'mix', peek: 'ㄧㄨㄩㄚㄛ', note: '沒有聲母', aria: '沒有聲母，從ㄧㄨㄩ或韻母開始', html: `${rowHTML([...'ㄧㄨㄩㄚㄛ'])}<span class="sub">沒有聲母</span>`, act: () => go('mf') },
+      phrasesTile(),
+    ];
+    case 'group': return [...S.group].map(s => symTile(s, true));
+    case 'mf': return [
+      ...[...MEDIALS].map(s => symTile(s, ok(s))), null,
+      ...FINAL_GROUPS.map(g => groupTile(g, 'fin', () => go('fgroup', g), ok)),
+      doneTile(),
+    ];
+    case 'f': return [...FINAL_GROUPS.map(g => groupTile(g, 'fin', () => go('fgroup', g), ok)), doneTile()];
+    case 'fgroup': return [...S.group].map(s => symTile(s, ok(s)));
+    case 'all': {
+      const tiles = ALL_SYMBOLS.map(s => symTile(s, validNext(s)));
+      const [cols, rows] = gridFor(0);
+      while (tiles.length < cols * rows - 2) tiles.push(null);
+      tiles.push(phrasesTile(), doneTile());
+      return tiles;
+    }
+    case 'tone': return TONES.map(t => {
+      const avail = !assistOn() || (BASES.get(b) || new Set()).has(t.mark);
+      const ex = charsFor(b + t.mark)[0] || '';
+      const syl = t.mark === '˙' ? `<b class="tm">˙</b>${b}` : `${b}<b class="tm">${t.glyph}</b>`;
+      return {
+        kind: 'tone', off: !avail, peek: t.mark === '˙' ? '˙' + b : b + t.glyph, note: t.name,
+        aria: `${t.name}${ex ? '，' + ex : ''}`, act: () => pickTone(t.mark),
+        html: `<span class="big" style="--len:${b.length + 1}">${syl}</span><span class="sub">${t.name}${ex ? '・' + ex : ''}</span>`,
+      };
+    });
+    case 'cand': { const key = b + S.tone; return paged(charsFor(key), ch => charTile(ch, key, pickChar), '更多字'); }
+    case 'next': {
+      const per = perPage();
+      const tiles = [...(DICT.next[S.lastChar] || '')].slice(0, per).map(ch => charTile(ch, READING.get(ch)?.key || '', pickNext));
+      while (tiles.length < per) tiles.push(null);
+      tiles.push(fnTile(`${ICON.pen}<span class="lbl" style="--len:3">自己拼</span>`, '自己拼', () => go(composeView())));
+      return tiles;
+    }
+    case 'menu': return [
+      ...['，', '。', '？', '！'].map(p => fnTile(`<span class="big">${p}</span>`, p, () => { addText([{ t: p }]); go(stageView()); })),
+      fnTile(`${ICON.space}<span class="sub">空格</span>`, '空格', () => { addText([{ t: ' ' }]); go(stageView()); }),
+      phrasesTile(),
+      fnTile(`${ICON.big}<span class="lbl" style="--len:5">大字給人看</span>`, '大字給人看', () => openShow(), { off: !S.text.length }),
+      fnTile(`${ICON.trash}<span class="lbl" style="--len:4">全部清除</span>`, '全部清除', () => go('clear'), { off: !S.text.length, kind: 'warn' }),
+      fnTile(`${ICON.gear}<span class="lbl" style="--len:5">按住開設定</span>`, '按住開設定', () => openSettings(), { hold: 1000, note: '按住一秒' }),
+    ];
+    case 'phrases': return paged(cfg.phrases.filter(Boolean).slice(0, 12), phraseTile, '更多句');
+    case 'clear': return [
+      { kind: 'warn', peek: '全部清除', aria: '確定全部清除', html: `${ICON.trash}<span class="lbl" style="--len:4">全部清除</span>`, act: () => { S.text = []; save(); resetComp(); go(composeView()); } },
+      fnTile(`<span class="lbl" style="--len:4">不要清除</span>`, '不要清除', () => go(stageView())),
+    ];
+  }
+  return [];
+}
+
+function gridFor(n) {
+  const portrait = innerHeight > innerWidth;
+  if (S.view === 'all') return portrait ? [6, 7] : [10, 4];
+  const L = { 1: [1, 1], 2: [2, 1], 3: [3, 1], 4: [2, 2], 5: [3, 2], 6: [3, 2], 7: [4, 2], 8: [4, 2], 9: [3, 3], 10: [5, 2], 11: [4, 3], 12: [4, 3] };
+  const P = { 1: [1, 1], 2: [1, 2], 3: [1, 3], 4: [2, 2], 5: [2, 3], 6: [2, 3], 7: [2, 4], 8: [2, 4], 9: [3, 3], 10: [2, 5], 11: [3, 4], 12: [3, 4] };
+  return (portrait ? P : L)[clamp(n, 1, 12)];
+}
+
+// ---------- 畫面 ----------
+const board = $('#board'), out = $('#out'), showEl = $('#show'), showText = $('#showText'), settingsEl = $('#settings');
+const sheetOpen = () => !settingsEl.hidden;
+function tileHTML(t, i) {
+  const a = [`class="tile ${t.kind}${t.off ? ' off' : ''}"`, 'type="button"', `data-i="${i}"`, 'data-target',
+    `aria-label="${esc(t.aria)}"`, `data-say="${esc(t.peek || '')}"`];
+  if (t.note) a.push(`data-note="${esc(t.note)}"`);
+  if (t.hold) a.push(`data-hold="${t.hold}"`);
+  if (t.off) a.push('aria-disabled="true"');
+  return `<button ${a.join(' ')}><span class="fill" aria-hidden="true"></span>${t.html}</button>`;
+}
+function render() {
+  current = buildTiles();
+  const [cols, rows] = gridFor(current.length);
+  board.style.setProperty('--cols', cols);
+  board.style.setProperty('--rows', rows);
+  board.dataset.view = S.view;
+  board.innerHTML = current.map((t, i) => t ? tileHTML(t, i) : '<div aria-hidden="true"></div>').join('');
+  renderText(); renderRail();
+  Touch.refresh();
+}
+// 正在拼的注音：接在打出來的字後面，用底色標出來
+function preedit() {
+  const b = base();
+  if (!b) return '';
+  return S.view === 'cand' && S.tone !== null ? fmtSyl(b, S.tone) : b;
+}
+function renderText() {
+  const pre = preedit();
+  const preHTML = pre ? `<span class="pre" aria-label="正在拼">${esc(pre)}</span>` : '';
+  if (!S.text.length && !pre) {
+    out.innerHTML = '<span class="ph">打出來的字會在這裡</span><span class="caret"></span>';
+    return;
+  }
+  out.innerHTML = S.text.map(u => {
+    if (u.zh) return `<span class="u zh">${esc(u.t)}</span>`;
+    if (cfg.ruby && u.z) return `<ruby class="u">${esc(u.t)}<rt>${esc(fmtKey(u.z))}</rt></ruby>`;
+    return `<span class="u">${u.t === ' ' ? '&nbsp;' : esc(u.t)}</span>`;
+  }).join('') + preHTML + '<span class="caret"></span>';
+}
+const setOff = (el, off) => { el.classList.toggle('off', off); el.setAttribute('aria-disabled', off ? 'true' : 'false'); };
+function renderRail() {
+  setOff($('[data-rail="back"]'), (S.view === 'home' || S.view === 'all') && !base() && !S.text.length);
+  setOff($('[data-rail="speak"]'), !S.text.length);
+  const m = $('[data-rail="menu"]'), inMenu = S.view === 'menu';
+  m.classList.toggle('on', inMenu);
+  m.querySelector('span').textContent = inMenu ? '收起' : '更多';
+  m.dataset.say = inMenu ? '收起' : '更多';
+}
+
+// ---------- 動作 ----------
+function go(view, group = '') { S.view = view; S.group = group; S.page = 0; render(); }
+function addText(units) { S.text.push(...units); if (S.text.length > 400) S.text.splice(0, S.text.length - 400); save(); }
+function pickSymbol(s) {
+  const c = S.comp;
+  c[kindOf(s)] = s;
+  if (cfg.speakKeys) Speech.say(SAY[s] || s);
+  if (c.fin) return go('tone');
+  const rest = c.med ? [...FINALS] : [...MEDIALS, ...FINALS];
+  if (!rest.some(canPick) && canFinish()) return go('tone');
+  go(composeView());
+}
+function pickTone(mark) {
+  const b = base(), key = b + mark;
+  if (cfg.output === 'zhuyin' || !charsFor(key).length) {
+    addText([{ t: fmtSyl(b, mark), z: key, zh: true }]);
+    if (cfg.speakKeys || cfg.speakChars) Speech.say(sayKey(key));
+    if (cfg.output !== 'zhuyin') toast('字典裡沒有這個音，先用注音寫下來');
+    resetComp();
+    return go(composeView());
+  }
+  if (cfg.speakKeys) Speech.say(sayKey(key));
+  S.tone = mark;
+  go('cand');
+}
+function pickChar(ch, key) {
+  addText([{ t: ch, z: key }]);
+  if (cfg.speakChars) Speech.say(ch);
+  resetComp();
+  S.lastChar = ch;
+  go(cfg.predict && (DICT.next[ch] || '').length ? 'next' : composeView());
+}
+const pickNext = ch => pickChar(ch, READING.get(ch)?.key || '');
+function pickPhrase(p) {
+  addText([...p].map(ch => ({ t: ch, z: READING.get(ch)?.key || '' })));
+  Speech.say(p);
+  resetComp();
+  go(composeView());
+}
+function back() {
+  const v = S.view, c = S.comp;
+  if (v === 'group') return go('home');
+  if (v === 'fgroup') return go(composeView());
+  if (v === 'cand') { if (S.page > 0) { S.page--; return render(); } S.tone = null; return go('tone'); }
+  if (v === 'phrases' && S.page > 0) { S.page--; return render(); }
+  if (['menu', 'phrases', 'clear', 'next'].includes(v)) return go(stageView());
+  if (v === 'tone') { c.fin = ''; return go(composeView()); }
+  // 拼字畫面：先退注音，沒有注音就刪掉最後一個字
+  if (c.fin) c.fin = ''; else if (c.med) c.med = ''; else if (c.ini) c.ini = '';
+  else if (v === 'mf') return go('home');
+  else { if (!S.text.length) return; S.text.pop(); save(); return render(); }
+  go(composeView());
+}
+function spoken() { return S.text.map(u => u.zh ? sayKey(u.z) : u.t).join('').trim(); }
+function speakAll() { Speech.say(spoken()); }
+function railAction(name) {
+  if (name === 'back') back();
+  else if (name === 'speak') speakAll();
+  else if (name === 'menu') S.view === 'menu' ? back() : go('menu');
+}
+function run(el) {
+  if (el.dataset.rail) return railAction(el.dataset.rail);
+  if (el.dataset.show) return el.dataset.show === 'speak' ? speakAll() : closeShow();
+  const t = current[+el.dataset.i];
+  if (t && !t.off) t.act();
+}
+
+// ---------- 觸控：手指沒力、點不準也能選對 ----------
+// 找手指位置對應的格子：點在格子之間的縫隙或格子外不遠處，算最近的那格；在上方打字列＝不選。
+function pickTarget(list, x, y, zone, snap) {
+  if (zone && x >= zone.left && x <= zone.right && y >= zone.top && y <= zone.bottom) return null;
+  let best = null, bd = Infinity;
+  for (const t of list) {
+    const dx = Math.max(t.r.left - x, 0, x - t.r.right), dy = Math.max(t.r.top - y, 0, y - t.r.bottom);
+    const d = Math.hypot(dx, dy);
+    if (d < bd) { bd = d; best = t; }
+  }
+  return best && bd <= snap ? best.el : null;
+}
+// 放開時算哪一格：放開前一瞬間才滑到的格子不算，回到手指真正停過的那格；很快的一點，以剛碰到的那格為準。
+function releaseChoice(trail, now, settle, minStay) {
+  if (!trail.length) return null;
+  const last = trail[trail.length - 1];
+  if (now - last.t >= settle) return last.el;
+  for (let i = trail.length - 2; i >= 0; i--) {
+    const end = trail[i + 1].t;
+    if (now - end > 250) break;
+    if (end - trail[i].t >= minStay) return trail[i].el;
+  }
+  if (now - trail[0].t < 250) return trail[0].el;
+  return last.el;
+}
+
+const Touch = (() => {
+  const SNAP = 44;      // px：縫隙或格子外這麼近，算最近的格子
+  const SETTLE = 110;   // ms：放開前這麼短時間內才滑到的格子，不算
+  const MIN_STAY = 120; // ms：在一格停這麼久，才算「停過」
+  const GRACE = 260;    // ms：按住的時候短暫滑出去再回來，進度不歸零
+  const PALM = 70;      // px：接觸面這麼大，當成手掌
+  const bubble = $('#bubble');
+  let targets = [], zone = null, act = null, hoverEl = null, lockUntil = 0, raf = 0, lastUp = -1e9;
+  const isOff = el => el.getAttribute('aria-disabled') === 'true';
+  // 這一格要按住多久才算（0＝不用按住）：「按住開設定」固定要按住；「按住才選」時每一格都要
+  const holdNeed = el => !el || isOff(el) ? 0 : el.dataset.hold ? +el.dataset.hold : cfg.press === 'hold' ? Math.max(300, cfg.holdTime * 1000) : 0;
+  const layer = () => showEl.hidden ? $('#app') : showEl;
+  function refresh() {
+    const root = layer();
+    targets = $$('[data-target]', root).filter(el => el.getClientRects().length).map(el => ({ el, r: el.getBoundingClientRect() }));
+    zone = (root === showEl ? showText : $('.top')).getBoundingClientRect();
+  }
+  function setHover(el) {
+    if (hoverEl === el) return;
+    if (hoverEl) hoverEl.classList.remove('is-touch');
+    hoverEl = el;
+    if (el) el.classList.add('is-touch');
+  }
+  function setProgress(el, p) {
+    if (el) el.style.setProperty('--p', clamp(p, 0, 1).toFixed(3));
+    bubble.style.setProperty('--p', clamp(p, 0, 1).toFixed(3));
+  }
+  function end() {
+    cancelAnimationFrame(raf);
+    if (act && act.holdEl) act.holdEl.style.removeProperty('--p');
+    setHover(null);
+    bubble.hidden = true;
+    act = null;
+  }
+  function showBubble(x, y, el) {
+    if (!cfg.bubble || !act || act.type === 'mouse') { bubble.hidden = true; return; }
+    const label = el ? el.dataset.say || '' : '';
+    const note = !el ? '放開就不選' : isOff(el) ? '這個不能選' : el.dataset.note || '';
+    const key = label + '|' + note;
+    if (bubble.dataset.key !== key) {
+      bubble.dataset.key = key;
+      bubble.innerHTML = (label ? `<b>${esc(label)}</b>` : '') + (note ? `<small>${esc(note)}</small>` : '');
+      bubble.classList.toggle('off', !el || isOff(el));
+      bubble.classList.toggle('long', [...label].length > 3);
+    }
+    bubble.classList.toggle('holding', holdNeed(el) > 0);
+    bubble.hidden = false;
+    const bw = bubble.offsetWidth, bh = bubble.offsetHeight, W = innerWidth, H = innerHeight, gapY = 64;
+    let bx = x - bw / 2, by = y - bh - gapY;
+    if (by < 8) { // 上面放不下：放到手指旁邊
+      by = clamp(y - bh / 2, 8, Math.max(8, H - bh - 8));
+      bx = x > W / 2 ? x - bw - gapY : x + gapY;
+    }
+    bx = clamp(bx, 8, Math.max(8, W - bw - 8));
+    bubble.style.transform = `translate3d(${Math.round(bx)}px, ${Math.round(by)}px, 0)`;
+  }
+  function move(x, y) {
+    if (!act) return;
+    const el = pickTarget(targets, x, y, zone, SNAP), t = performance.now(), last = act.trail[act.trail.length - 1];
+    if (!last || last.el !== el) { act.trail.push({ el, t }); if (act.trail.length > 24) act.trail.shift(); }
+    if (act.done) return;
+    setHover(el);
+    showBubble(x, y, el);
+  }
+  function holdTick() {
+    if (!act || act.done) return;
+    const now = performance.now(), dt = Math.min(now - act.lastT, 100);
+    act.lastT = now;
+    const cur = act.trail.length ? act.trail[act.trail.length - 1].el : null;
+    if (cur && cur === act.holdEl) { act.awayAt = 0; act.holdAcc += dt; }
+    else if (act.holdEl) {
+      if (!act.awayAt) act.awayAt = now;
+      if (now - act.awayAt > GRACE) { act.holdEl.style.removeProperty('--p'); act.holdEl = cur; act.holdAcc = 0; act.awayAt = 0; }
+    } else if (cur) { act.holdEl = cur; act.holdAcc = 0; }
+    const need = holdNeed(act.holdEl);
+    if (need) {
+      setProgress(act.holdEl, act.holdAcc / need);
+      if (act.holdAcc >= need) {
+        const el = act.holdEl;
+        el.style.removeProperty('--p');
+        act.done = true; setHover(null); bubble.hidden = true;
+        activate(el, true);
+        return;
+      }
+    }
+    raf = requestAnimationFrame(holdTick);
+  }
+  function nope(el) {
+    if (!el || cfg.calm) return;
+    el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope');
+    setTimeout(() => el.classList.remove('nope'), 320);
+  }
+  function activate(el, held = false) {
+    if (!el) return;
+    if (isOff(el)) { nope(el); return; }
+    if (el.dataset.hold && !held) { nope(el); toast('要按住一秒才會打開'); return; }
+    const now = performance.now();
+    if (now < lockUntil) return; // 手抖連按：這段時間內再碰到都不算
+    lockUntil = now + Math.max(220, cfg.guard * 1000);
+    el.classList.add('picked');
+    Sound.tick();
+    try { navigator.vibrate?.(12); } catch { /* 有些裝置不能震動 */ }
+    setTimeout(() => { el.classList.remove('picked'); run(el); }, cfg.calm ? 90 : 150);
+  }
+  function onDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (sheetOpen()) return;
+    e.preventDefault();
+    refresh();
+    if (act) end(); // 新的手指接手；先放著的那根之後放開不算
+    const palm = (e.width || 0) >= PALM && (e.height || 0) >= PALM;
+    act = { id: e.pointerId, type: e.pointerType, trail: [], done: palm, palm, holdEl: null, holdAcc: 0, awayAt: 0, lastT: performance.now() };
+    if (palm) return;
+    move(e.clientX, e.clientY);
+    const first = act.trail[act.trail.length - 1].el;
+    if (cfg.press === 'down' && !(first && first.dataset.hold)) {
+      act.done = true; setHover(null); bubble.hidden = true;
+      if (first) activate(first);
+      return;
+    }
+    raf = requestAnimationFrame(holdTick);
+  }
+  function onMove(e) { if (act && e.pointerId === act.id) move(e.clientX, e.clientY); }
+  function onUp(e) {
+    lastUp = performance.now();
+    Unlock.now(); // 語音和提示音要在使用者的動作裡解鎖（iPad 的規定）
+    if (!act || e.pointerId !== act.id) return;
+    const a = act;
+    if (!a.done) move(e.clientX, e.clientY);
+    const now = performance.now();
+    end();
+    if (a.done || a.palm) return;
+    const el = releaseChoice(a.trail, now, SETTLE, MIN_STAY);
+    if (el && el.dataset.hold) { activate(el); return; } // 沒按滿一秒就放開：提醒要按住
+    if (cfg.press === 'lift' && el) activate(el);
+  }
+  function onCancel(e) { if (act && e.pointerId === act.id) end(); }
+  [$('#app'), showEl].forEach(r => {
+    r.addEventListener('pointerdown', onDown);
+    r.addEventListener('touchmove', e => e.preventDefault(), { passive: false }); // 手指滑動時畫面不捲動
+    r.addEventListener('contextmenu', e => e.preventDefault());
+  });
+  addEventListener('pointermove', onMove, { passive: true });
+  addEventListener('pointerup', onUp);
+  addEventListener('pointercancel', onCancel);
+  // 外接鍵盤、切換控制、讀屏：用 Enter 或輔助功能「點一下」也能選（手指剛處理過的就不重複）
+  document.addEventListener('click', e => {
+    const el = e.target.closest?.('[data-target]');
+    if (!el || sheetOpen() || performance.now() - lastUp < 700) return;
+    Unlock.now();
+    activate(el, true);
+  });
+  return { refresh, activate, cancel: end };
+})();
+
+// ---------- 語音、提示音 ----------
+const Speech = {
+  voice: null,
+  init() {
+    if (!('speechSynthesis' in window)) return;
+    const pick = () => {
+      const vs = speechSynthesis.getVoices();
+      this.voice = vs.find(v => /zh[-_]TW/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang) && !/HK|yue/i.test(v.lang)) || null;
+    };
+    pick();
+    if (speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', pick);
+    else speechSynthesis.onvoiceschanged = pick;
+  },
+  say(text) {
+    if (!text || !('speechSynthesis' in window)) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-TW'; u.rate = +cfg.rate;
+      if (this.voice) u.voice = this.voice;
+      speechSynthesis.speak(u);
+    } catch { /* 沒有語音也能打字 */ }
+  },
+  unlock() { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch { } },
+};
+const Sound = {
+  ctx: null,
+  unlock() { try { this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)(); this.ctx.resume(); } catch { } },
+  tick() {
+    if (!cfg.sound || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = 'sine'; o.frequency.value = 620;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.09, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      o.connect(g).connect(this.ctx.destination); o.start(t); o.stop(t + 0.2);
+    } catch { }
+  },
+};
+let wakeLock = null;
+async function keepAwake() { try { wakeLock = await navigator.wakeLock?.request('screen'); } catch { /* 不讓保持亮著也沒關係 */ } }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && wakeLock) keepAwake(); });
+const Unlock = { done: false, now() { if (this.done) return; this.done = true; Speech.unlock(); Sound.unlock(); keepAwake(); } };
+
+// ---------- 提示、大字 ----------
+const toastEl = $('#toast');
+let toastTimer = 0;
+function toast(msg, ms = 3200) {
+  clearTimeout(toastTimer);
+  toastEl.textContent = msg || '';
+  toastEl.hidden = !msg;
+  if (msg) toastTimer = setTimeout(() => { toastEl.hidden = true; }, ms);
+}
+function openShow() {
+  if (!S.text.length) return;
+  showEl.hidden = false;
+  fitShow();
+  Touch.refresh();
+}
+function closeShow() { showEl.hidden = true; go(stageView()); }
+function fitShow() {
+  const inner = $('#showInner');
+  inner.textContent = S.text.map(u => u.t).join('').trim() || ' ';
+  let lo = 20, hi = 480;
+  for (let i = 0; i < 16; i++) {
+    const mid = (lo + hi) / 2;
+    inner.style.fontSize = mid + 'px';
+    if (inner.offsetHeight <= showText.clientHeight && inner.scrollWidth <= showText.clientWidth) lo = mid; else hi = mid;
+  }
+  inner.style.fontSize = Math.floor(lo) + 'px';
+}
+
+// ---------- 設定（在「更多」裡按住一秒才打開，免得被不小心碰到） ----------
+function openSettings() {
+  Touch.cancel();
+  syncForm();
+  settingsEl.hidden = false;
+  settingsEl.scrollTop = 0;
+}
+function closeSettings() { settingsEl.hidden = true; Unlock.now(); go(stageView()); }
+$$('[data-close-settings]').forEach(b => b.addEventListener('click', closeSettings));
+function syncForm() {
+  $$('[data-set]').forEach(el => {
+    const k = el.dataset.set, v = cfg[k];
+    if (el.type === 'checkbox') el.checked = !!v;
+    else if (el.type === 'radio') el.checked = String(v) === el.value;
+    else if (k === 'phrases') el.value = v.join('\n');
+    else el.value = v;
+  });
+  updateOutputs();
+}
+function updateOutputs() {
+  $('#out-hold').textContent = `${(+cfg.holdTime).toFixed(1)} 秒`;
+  $('#out-guard').textContent = +cfg.guard ? `${(+cfg.guard).toFixed(1)} 秒` : '不限制';
+  $('#out-rate').textContent = `${(+cfg.rate).toFixed(2)} 倍`;
+  $('#holdField').hidden = cfg.press !== 'hold';
+}
+$$('[data-set]').forEach(el => {
+  const k = el.dataset.set;
+  el.addEventListener(el.type === 'range' || k === 'phrases' ? 'input' : 'change', () => {
+    if (el.type === 'checkbox') cfg[k] = el.checked;
+    else if (el.type === 'radio') { if (!el.checked) return; cfg[k] = typeof DEFAULTS[k] === 'number' ? +el.value : el.value; }
+    else if (k === 'phrases') cfg[k] = el.value.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 12);
+    else cfg[k] = +el.value;
+    save();
+    applySetting(k);
+    updateOutputs();
+  });
+});
+function applySetting(k) {
+  if (k === 'size') document.documentElement.style.setProperty('--scale', cfg.size);
+  if (k === 'calm') document.body.classList.toggle('calm', !!cfg.calm);
+  if (k === 'layout') S.view = stageView();
+  if (k === 'assist' || k === 'output') { resetComp(); S.view = composeView(); }
+}
+$('#testVoice').addEventListener('click', () => { Unlock.now(); Speech.say('你好，我想喝水'); });
+$('#wipeText').addEventListener('click', () => { S.text = []; save(); render(); $('#textNote').textContent = '已清除'; });
+$('#copyText').addEventListener('click', () => {
+  const s = S.text.map(u => u.t).join('');
+  const note = $('#textNote');
+  if (!s) { note.textContent = '還沒有字'; return; }
+  const fallback = () => { note.textContent = s; };
+  try { navigator.clipboard.writeText(s).then(() => { note.textContent = '已複製'; }, fallback); } catch { fallback(); }
+});
+
+// 外接鍵盤：數字鍵選第幾格、Backspace 退回
+document.addEventListener('keydown', e => {
+  if (sheetOpen() || e.target.closest?.('input, textarea')) return;
+  if (/^[1-9]$/.test(e.key)) { const b = $$('#board [data-target]')[+e.key - 1]; if (b) { Unlock.now(); Touch.activate(b, true); } }
+  else if (e.key === 'Backspace') { e.preventDefault(); Touch.activate($('[data-rail="back"]')); }
+});
+
+// ---------- 啟動 ----------
+Speech.init();
+document.documentElement.style.setProperty('--scale', cfg.size);
+document.body.classList.toggle('calm', !!cfg.calm);
+if (!HAS_DICT) { cfg.output = 'zhuyin'; toast('字典沒有載入，先用「只打注音」', 5000); }
+S.view = composeView();
+render();
+addEventListener('resize', () => { Touch.cancel(); render(); if (!showEl.hidden) { fitShow(); Touch.refresh(); } });
+window.ZhuyinBoard = { state: S, cfg, render, go, _test: { pickTarget, releaseChoice } }; // 給測試用
+})();
+</script>
 
 <script>
 if ('serviceWorker' in navigator && window.isSecureContext) {

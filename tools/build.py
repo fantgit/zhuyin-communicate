@@ -5,7 +5,6 @@
 """
 import hashlib
 import json
-import math
 import re
 import shutil
 import zipfile
@@ -15,8 +14,8 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "docs"
-NAME = "眼睛注音板"
-VERSION = "1.0.0"
+NAME = "注音溝通板"
+SLUG = "zhuyin-communicate"
 
 HEAD = f"""<!doctype html>
 <html lang="zh-Hant-TW">
@@ -27,11 +26,11 @@ HEAD = f"""<!doctype html>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="{NAME}">
-<meta name="theme-color" content="#E7ECEE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#11171A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#E5EBE8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1619" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<style>:root{{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}}body{{margin:0;font:14px system-ui,sans-serif}}img{{max-width:100%}}[hidden]{{display:none!important}}</style>
+<style>:root{{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}}body{{margin:0;font:14px system-ui,sans-serif}}img{{max-width:100%}}[hidden]{{display:none!important}}</style>
 </head>
 <body>
 """
@@ -46,73 +45,57 @@ if ('serviceWorker' in navigator && window.isSecureContext) {
 </html>
 """
 
-MP_VERSION = "0.10.35"
-CORE_FILES = ["./", "index.html", "app.js", "gaze.js", "data/zhuyin-dict.js", "manifest.webmanifest",
+CORE_FILES = ["./", "index.html", "data/zhuyin-dict.js", "manifest.webmanifest",
               "icons/icon-180.png", "icons/icon-192.png"]
 FONT_FILE = "fonts/zhuyinboard-round.woff2"
-MODEL_FILES = ["vendor/mediapipe/vision_bundle.mjs", "vendor/mediapipe/wasm/vision_wasm_internal.js",
-               "vendor/mediapipe/wasm/vision_wasm_internal.wasm", "vendor/mediapipe/face_landmarker.task"]
 
-SW = """// 離線快取
-// - 鍵盤：先用快取（沒有網路也能馬上打開），同時在背景抓新版，下次打開就是新版
-// - 相機眼控模型和字型：只下載一次；程式改版時不用重新下載 15 MB 的模型
-const CORE = 'zhuyin-eye-core-%(core)s';
-const MODEL = 'zhuyin-eye-model-%(mp)s';
-const CORE_FILES = %(core_files)s;
-const MODEL_FILES = %(model_files)s;
-const isStatic = url => /\\/(vendor|fonts|icons)\\//.test(url.pathname);
+SW = """// 離線快取：先用快取（沒有網路也能馬上打開），同時在背景抓新版，下次打開就是新版
+const CACHE = '%(slug)s-%(hash)s';
+const FILES = %(files)s;
 
 self.addEventListener('install', e => e.waitUntil((async () => {
-  await (await caches.open(CORE)).addAll(CORE_FILES);
-  const model = await caches.open(MODEL);
-  await Promise.all(MODEL_FILES.map(async f => { // 模型下載失敗不影響鍵盤離線使用，之後用到時會再抓
-    if (!(await model.match(f))) { try { await model.add(f); } catch (err) { } }
-  }));
+  await (await caches.open(CACHE)).addAll(FILES);
   await self.skipWaiting();
 })()));
 
+// 只清掉本站自己的舊版快取，以及舊的眼控版留下的快取（同一個 github.io 網域上別的網站的快取不動）
 self.addEventListener('activate', e => e.waitUntil((async () => {
-  for (const k of await caches.keys()) if (k !== CORE && k !== MODEL) await caches.delete(k);
+  for (const k of await caches.keys()) {
+    if ((k.startsWith('%(slug)s-') && k !== CACHE) || k.startsWith('zhuyin-eye-')) await caches.delete(k);
+  }
   await self.clients.claim();
 })()));
 
 self.addEventListener('fetch', e => {
   const req = e.request, url = new URL(req.url);
-  if (req.method !== 'GET' || url.origin !== location.origin) return;
+  if (req.method !== 'GET' || url.origin !== location.origin || !url.href.startsWith(self.registration.scope)) return;
   e.respondWith((async () => {
-    const hit = await caches.match(req, { ignoreSearch: true });
-    if (hit && isStatic(url)) return hit;
-    const net = fetch(req).then(res => {
-      if (res.ok) { const copy = res.clone(); caches.open(isStatic(url) ? MODEL : CORE).then(c => c.put(req, copy)); }
-      return res;
-    });
+    const cache = await caches.open(CACHE);
+    const hit = await cache.match(req, { ignoreSearch: true });
+    const net = fetch(req).then(res => { if (res.ok) cache.put(req, res.clone()); return res; });
     if (hit) { e.waitUntil(net.catch(() => { })); return hit; }
     try { return await net; }
-    catch (err) { return (req.mode === 'navigate' && await caches.match('index.html')) || Response.error(); }
+    catch (err) { return (req.mode === 'navigate' && await cache.match('index.html')) || Response.error(); }
   })());
 });
 """
 
 
 def icon(size: int) -> Image.Image:
-    """圓角方塊裡的一隻眼睛：校正點用的同一組顏色。"""
+    """圓角方塊裡的對話框，框裡四塊注音鍵：聲母藍、介音綠、韻母黃、聲調紫。"""
     s = size * 4
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    d.rounded_rectangle([0, 0, s - 1, s - 1], radius=int(s * 0.22), fill=(29, 108, 117, 255))
-    cx, cy, w, h = s / 2, s / 2, s * 0.72, s * 0.40
-    pts = []
-    for i in range(181):
-        t = math.pi * i / 180
-        pts.append((cx - w / 2 + w * i / 180, cy - h / 2 * math.sin(t)))
-    for i in range(181):
-        t = math.pi * i / 180
-        pts.append((cx + w / 2 - w * i / 180, cy + h / 2 * math.sin(t)))
-    d.polygon(pts, fill=(250, 251, 251, 255))
-    r = s * 0.15
-    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(27, 40, 46, 255))
-    r2 = s * 0.055
-    d.ellipse([cx - r2, cy - r2, cx + r2, cy + r2], fill=(233, 169, 59, 255))
+    d.rounded_rectangle([0, 0, s - 1, s - 1], radius=int(s * 0.22), fill=(10, 102, 112, 255))
+    white = (251, 252, 251, 255)
+    d.rounded_rectangle([s * 0.13, s * 0.15, s * 0.87, s * 0.71], radius=int(s * 0.12), fill=white)
+    d.polygon([(s * 0.27, s * 0.66), (s * 0.22, s * 0.87), (s * 0.45, s * 0.69)], fill=white)
+    colors = [(77, 130, 190, 255), (76, 160, 110, 255), (222, 166, 64, 255), (140, 112, 196, 255)]
+    xs = [(0.24, 0.48), (0.52, 0.76)]
+    ys = [(0.25, 0.42), (0.45, 0.62)]
+    for i, (y0, y1) in enumerate(ys):
+        for j, (x0, x1) in enumerate(xs):
+            d.rounded_rectangle([s * x0, s * y0, s * x1, s * y1], radius=int(s * 0.04), fill=colors[i * 2 + j])
     return img.resize((size, size), Image.LANCZOS)
 
 
@@ -121,7 +104,7 @@ def main() -> None:
         shutil.rmtree(DIST)
     (DIST / "icons").mkdir(parents=True)
     page = (ROOT / "index.html").read_text(encoding="utf-8")
-    core_files = list(CORE_FILES)
+    files = list(CORE_FILES)
     if (ROOT / FONT_FILE).exists():  # 自架版用本機字型，離線時字形才不會換掉
         page = re.sub(r'<link rel="preconnect"[^>]*>\n', "", page)
         gf = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&display=swap">'
@@ -134,31 +117,27 @@ def main() -> None:
         for f in (Path(FONT_FILE).name, "OFL.txt"):
             if (ROOT / "fonts" / f).exists():
                 shutil.copy2(ROOT / "fonts" / f, DIST / "fonts" / f)
-        core_files.append(FONT_FILE)
+        files.append(FONT_FILE)
     (DIST / "index.html").write_text(HEAD + page + TAIL, encoding="utf-8")
-    for f in ["app.js", "gaze.js", "data/zhuyin-dict.js", "data/README.md"]:
+    for f in ["data/zhuyin-dict.js", "data/README.md"]:
         (DIST / f).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / f, DIST / f)
-    if (ROOT / "vendor").exists():
-        shutil.copytree(ROOT / "vendor", DIST / "vendor")
     for size in (180, 192, 512):
         icon(size).save(DIST / "icons" / f"icon-{size}.png")
     manifest = {
         "id": "./", "name": NAME, "short_name": NAME, "lang": "zh-Hant-TW", "start_url": "./", "scope": "./",
         "display": "standalone", "orientation": "any",
-        "background_color": "#E7ECEE", "theme_color": "#1D6C75",
+        "background_color": "#E5EBE8", "theme_color": "#0A6670",
         "icons": [{"src": f"icons/icon-{n}.png", "sizes": f"{n}x{n}", "type": "image/png"} for n in (192, 512)],
     }
     (DIST / "manifest.webmanifest").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     digest = hashlib.sha256()
-    for f in core_files:
+    for f in files:
         if f != "./":
             digest.update((DIST / f).read_bytes())
-    sw = SW % {"core": digest.hexdigest()[:10], "mp": MP_VERSION,
-               "core_files": json.dumps(core_files), "model_files": json.dumps(MODEL_FILES)}
-    (DIST / "sw.js").write_text(sw, encoding="utf-8")
+    (DIST / "sw.js").write_text(SW % {"slug": SLUG, "hash": digest.hexdigest()[:10], "files": json.dumps(files)}, encoding="utf-8")
     (DIST / ".nojekyll").write_text("", encoding="utf-8")  # GitHub Pages 不要處理檔案
-    z = ROOT / "zhuyin-eye-site.zip"
+    z = ROOT / f"{SLUG}-site.zip"
     with zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED) as zf:
         for p in sorted(DIST.rglob("*")):
             if p.is_file():
