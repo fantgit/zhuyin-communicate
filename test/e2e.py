@@ -60,6 +60,14 @@ async def center(page, sel):
     return b["x"] + b["width"] / 2, b["y"] + b["height"] / 2, b
 
 
+async def touch(page, kind, x, y, pid, w=20, h=20):
+    """送出一個觸控的 pointer 事件（可以指定接觸面大小、指定是哪一根手指）。"""
+    await page.evaluate("""([kind, x, y, pid, w, h]) => {
+      const el = document.elementFromPoint(x, y) || document.body;
+      el.dispatchEvent(new PointerEvent(kind, {bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: pid, pointerType: 'touch', isPrimary: false, width: w, height: h}));
+    }""", [kind, x, y, pid, w, h])
+
+
 async def tap(page, sel, wait=620):
     x, y, _ = await center(page, sel)
     await page.mouse.move(x, y)
@@ -130,7 +138,43 @@ async def functional(page, url):
     check("touch in the gap → nearest block", s["view"] == "group" and s["group"] == "ㄉㄊㄋㄌ", s)
     await tap(page, '[data-rail="back"]')
 
+    # 斜按、平按：接觸面很大也算
+    await touch(page, "pointerdown", *c0, 21, 140, 120); await page.wait_for_timeout(180)
+    await touch(page, "pointerup", *c0, 21, 140, 120); await page.wait_for_timeout(620)
+    s = await st(page)
+    check("a flat or angled press (large contact area) still selects", s["view"] == "group" and s["group"] == "ㄅㄆㄇㄈ", s)
+    await tap(page, '[data-rail="back"]')
+
+    # 按著的時候，另一根手指或指節碰到打字列又離開：原本那根手指照樣算
+    await touch(page, "pointerdown", *c1, 22); await page.wait_for_timeout(120)
+    await touch(page, "pointerdown", ox, oy, 23); await page.wait_for_timeout(120)
+    await touch(page, "pointerup", ox, oy, 23); await page.wait_for_timeout(150)
+    await touch(page, "pointerup", *c1, 22); await page.wait_for_timeout(620)
+    s = await st(page)
+    check("a second finger brushing the screen does not cancel the press", s["view"] == "group" and s["group"] == "ㄉㄊㄋㄌ", s)
+    await tap(page, '[data-rail="back"]')
+
+    # 手掌先放著、手指去點：手指算，手掌放開不算
+    b2 = await blocks.nth(2).bounding_box()
+    c2 = (b2["x"] + b2["width"] / 2, b2["y"] + b2["height"] / 2)
+    await touch(page, "pointerdown", *c2, 24, 160, 160); await page.wait_for_timeout(200)
+    await touch(page, "pointerdown", *c1, 25); await page.wait_for_timeout(150)
+    await touch(page, "pointerup", *c1, 25); await page.wait_for_timeout(700)
+    await touch(page, "pointerup", *c2, 24, 160, 160); await page.wait_for_timeout(620)
+    s = await st(page)
+    check("resting palm: the tapping finger counts, lifting the palm does not", s["view"] == "group" and s["group"] == "ㄉㄊㄋㄌ" and s["comp"]["ini"] == "", s)
+    await tap(page, '[data-rail="back"]')
+
+    # 被系統手勢打斷（pointercancel）：按著的格子照樣算
+    await touch(page, "pointerdown", *c0, 26); await page.wait_for_timeout(250)
+    await touch(page, "pointercancel", *c0, 26); await page.wait_for_timeout(620)
+    s = await st(page)
+    check("a press interrupted by a system gesture still selects", s["view"] == "group" and s["group"] == "ㄅㄆㄇㄈ", s)
+    await tap(page, '[data-rail="back"]')
+
     # 防手抖連按
+    check("default guard time is 0.25 s", await page.evaluate("ZhuyinBoard.cfg.guard") == 0.25)
+    await page.evaluate("ZhuyinBoard.cfg.guard = 0.5")
     await page.mouse.move(*c0); await page.mouse.down(); await page.wait_for_timeout(40); await page.mouse.up()
     await page.wait_for_timeout(230)
     gb = await page.locator("#board [data-target]").first.bounding_box()
@@ -141,6 +185,7 @@ async def functional(page, url):
     await tap(page, "#board [data-target]:nth-child(1)")
     s = await st(page)
     check("after the guard time a tap works again", s["comp"]["ini"] == "ㄅ", s)
+    await page.evaluate("ZhuyinBoard.cfg.guard = 0.25")
     await tap(page, '[data-rail="back"]')
     s = await st(page)
     check("退回 removes the last zhuyin", s["comp"]["ini"] == "" and s["view"] == "home", s)
@@ -183,12 +228,9 @@ async def functional(page, url):
 
     # 設定：在「更多」裡，點一下不會開，按住一秒才開
     await tap(page, '[data-rail="menu"]')
-    check("更多 has 9 blocks including 按住開設定", await page.locator("#board [data-target]").count() == 9 and await page.locator('#board [data-say="按住開設定"]').count() == 1)
-    await tap(page, '#board [data-say="按住開設定"]')
-    check("a quick tap does not open settings and shows a hint", await page.locator("#settings").is_hidden() and await page.locator("#toast").is_visible())
-    x, y, _ = await center(page, '#board [data-say="按住開設定"]')
-    await page.mouse.move(x, y); await page.mouse.down(); await page.wait_for_timeout(1250); await page.mouse.up(); await page.wait_for_timeout(400)
-    check("holding 按住開設定 for a second opens settings", await page.locator("#settings").is_visible())
+    check("更多 has 9 blocks including 設定", await page.locator("#board [data-target]").count() == 9 and await page.locator('#board [data-say="設定"]').count() == 1)
+    await tap(page, '#board [data-say="設定"]', wait=400)
+    check("one tap on 設定 opens settings", await page.locator("#settings").is_visible())
     await page.locator("[data-close-settings]").first.click(); await page.wait_for_timeout(300)
     check("完成 closes settings", await page.locator("#settings").is_hidden())
 

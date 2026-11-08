@@ -502,7 +502,7 @@ const sayKey = key => charsFor(key)[0] || fmtKey(key);
 const DEFAULT_PHRASES = ['我要喝水', '我想上廁所', '我會痛', '我想睡覺', '我肚子餓', '請幫我', '不要', '要'];
 const OLD_DEFAULT_PHRASES = ['我要喝水', '我想上廁所', '我會痛', '我想休息', '我肚子餓', '請幫我', '不要', '謝謝'];
 const DEFAULTS = {
-  press: 'lift', holdTime: 0.6, guard: 0.4, bubble: true,
+  press: 'lift', holdTime: 0.6, guard: 0.25, bubble: true,
   layout: 'big', size: 1, calm: false,
   output: 'hanzi', assist: true, ruby: true, predict: false,
   speakKeys: true, speakChars: true, sound: true, rate: 0.85,
@@ -513,6 +513,7 @@ const stored = (() => { try { return JSON.parse(localStorage.getItem(STORE)) || 
 const cfg = Object.assign({}, DEFAULTS, stored.settings || {});
 // 沒改過常用句的裝置，換成新的預設；自己改過的不動
 if (!Array.isArray(cfg.phrases) || cfg.phrases.join('\n') === OLD_DEFAULT_PHRASES.join('\n')) cfg.phrases = DEFAULT_PHRASES.slice();
+if (cfg.guard === 0.4) cfg.guard = DEFAULTS.guard; // 舊預設的防連按時間比較長，一起改成新的預設
 
 // ---------- 狀態 ----------
 const S = {
@@ -625,7 +626,7 @@ function buildTiles() {
       phrasesTile(),
       fnTile(`${ICON.big}<span class="lbl" style="--len:5">大字給人看</span>`, '大字給人看', () => openShow(), { off: !S.text.length }),
       fnTile(`${ICON.trash}<span class="lbl" style="--len:4">全部清除</span>`, '全部清除', () => go('clear'), { off: !S.text.length, kind: 'warn' }),
-      fnTile(`${ICON.gear}<span class="lbl" style="--len:5">按住開設定</span>`, '按住開設定', () => openSettings(), { hold: 1000, note: '按住一秒' }),
+      fnTile(`${ICON.gear}<span class="lbl" style="--len:2">設定</span>`, '設定', () => openSettings()),
     ];
     case 'phrases': return paged(cfg.phrases.filter(Boolean).slice(0, 12), phraseTile, '更多句');
     case 'clear': return [
@@ -651,7 +652,6 @@ function tileHTML(t, i) {
   const a = [`class="tile ${t.kind}${t.off ? ' off' : ''}"`, 'type="button"', `data-i="${i}"`, 'data-target',
     `aria-label="${esc(t.aria)}"`, `data-say="${esc(t.peek || '')}"`];
   if (t.note) a.push(`data-note="${esc(t.note)}"`);
-  if (t.hold) a.push(`data-hold="${t.hold}"`);
   if (t.off) a.push('aria-disabled="true"');
   return `<button ${a.join(' ')}><span class="fill" aria-hidden="true"></span>${t.html}</button>`;
 }
@@ -788,16 +788,19 @@ function releaseChoice(trail, now, settle, minStay) {
 }
 
 const Touch = (() => {
-  const SNAP = 44;      // px：縫隙或格子外這麼近，算最近的格子
+  const SNAP = 56;      // px：縫隙或格子外這麼近，算最近的格子
   const SETTLE = 110;   // ms：放開前這麼短時間內才滑到的格子，不算
   const MIN_STAY = 120; // ms：在一格停這麼久，才算「停過」
   const GRACE = 260;    // ms：按住的時候短暫滑出去再回來，進度不歸零
-  const PALM = 70;      // px：接觸面這麼大，當成手掌
   const bubble = $('#bubble');
-  let targets = [], zone = null, act = null, hoverEl = null, lockUntil = 0, raf = 0, lastUp = -1e9;
+  let targets = [], zone = null, hoverEl = null, lockUntil = 0, raf = 0, lastUp = -1e9;
+  // 螢幕上每一根手指各記一筆，最後放上去的那根算數。它沒選到東西就放開時，原本按著的手指接著算；
+  // 選到東西之後，其他還放著的手指（例如手掌）放開都不算。接觸面大小不過濾：手指斜按、平按都算。
+  let fingers = [];
+  const top = () => fingers[fingers.length - 1] || null;
+  const at = f => f && f.trail.length ? f.trail[f.trail.length - 1].el : null;
   const isOff = el => el.getAttribute('aria-disabled') === 'true';
-  // 這一格要按住多久才算（0＝不用按住）：「按住開設定」固定要按住；「按住才選」時每一格都要
-  const holdNeed = el => !el || isOff(el) ? 0 : el.dataset.hold ? +el.dataset.hold : cfg.press === 'hold' ? Math.max(300, cfg.holdTime * 1000) : 0;
+  const holdNeed = el => !el || isOff(el) || cfg.press !== 'hold' ? 0 : Math.max(300, cfg.holdTime * 1000);
   const layer = () => showEl.hidden ? $('#app') : showEl;
   function refresh() {
     const root = layer();
@@ -814,15 +817,10 @@ const Touch = (() => {
     if (el) el.style.setProperty('--p', clamp(p, 0, 1).toFixed(3));
     bubble.style.setProperty('--p', clamp(p, 0, 1).toFixed(3));
   }
-  function end() {
-    cancelAnimationFrame(raf);
-    if (act && act.holdEl) act.holdEl.style.removeProperty('--p');
-    setHover(null);
-    bubble.hidden = true;
-    act = null;
-  }
-  function showBubble(x, y, el) {
-    if (!cfg.bubble || !act || act.type === 'mouse') { bubble.hidden = true; return; }
+  function clearHold(f) { if (f && f.holdEl) f.holdEl.style.removeProperty('--p'); }
+  function hide() { setHover(null); bubble.hidden = true; }
+  function showBubble(f, el) {
+    if (!cfg.bubble || f.type === 'mouse') { bubble.hidden = true; return; }
     const label = el ? el.dataset.say || '' : '';
     const note = !el ? '放開就不選' : isOff(el) ? '這個不能選' : el.dataset.note || '';
     const key = label + '|' + note;
@@ -834,7 +832,7 @@ const Touch = (() => {
     }
     bubble.classList.toggle('holding', holdNeed(el) > 0);
     bubble.hidden = false;
-    const bw = bubble.offsetWidth, bh = bubble.offsetHeight, W = innerWidth, H = innerHeight, gapY = 64;
+    const bw = bubble.offsetWidth, bh = bubble.offsetHeight, W = innerWidth, H = innerHeight, gapY = 64, x = f.x, y = f.y;
     let bx = x - bw / 2, by = y - bh - gapY;
     if (by < 8) { // 上面放不下：放到手指旁邊
       by = clamp(y - bh / 2, 8, Math.max(8, H - bh - 8));
@@ -843,49 +841,61 @@ const Touch = (() => {
     bx = clamp(bx, 8, Math.max(8, W - bw - 8));
     bubble.style.transform = `translate3d(${Math.round(bx)}px, ${Math.round(by)}px, 0)`;
   }
-  function move(x, y) {
-    if (!act) return;
-    const el = pickTarget(targets, x, y, zone, SNAP), t = performance.now(), last = act.trail[act.trail.length - 1];
-    if (!last || last.el !== el) { act.trail.push({ el, t }); if (act.trail.length > 24) act.trail.shift(); }
-    if (act.done) return;
+  function show(f) {
+    if (!f || f.done) return hide();
+    const el = at(f);
     setHover(el);
-    showBubble(x, y, el);
+    showBubble(f, el);
+  }
+  function track(f, x, y) {
+    const el = pickTarget(targets, x, y, zone, SNAP), t = performance.now(), last = f.trail[f.trail.length - 1];
+    if (!last || last.el !== el) { f.trail.push({ el, t }); if (f.trail.length > 24) f.trail.shift(); }
+    f.x = x; f.y = y;
   }
   function holdTick() {
-    if (!act || act.done) return;
-    const now = performance.now(), dt = Math.min(now - act.lastT, 100);
-    act.lastT = now;
-    const cur = act.trail.length ? act.trail[act.trail.length - 1].el : null;
-    if (cur && cur === act.holdEl) { act.awayAt = 0; act.holdAcc += dt; }
-    else if (act.holdEl) {
-      if (!act.awayAt) act.awayAt = now;
-      if (now - act.awayAt > GRACE) { act.holdEl.style.removeProperty('--p'); act.holdEl = cur; act.holdAcc = 0; act.awayAt = 0; }
-    } else if (cur) { act.holdEl = cur; act.holdAcc = 0; }
-    const need = holdNeed(act.holdEl);
+    const f = top();
+    if (!f || f.done || cfg.press !== 'hold') return;
+    const now = performance.now(), dt = Math.min(now - f.lastT, 100);
+    f.lastT = now;
+    const cur = at(f);
+    if (cur && cur === f.holdEl) { f.awayAt = 0; f.holdAcc += dt; }
+    else if (f.holdEl) {
+      if (!f.awayAt) f.awayAt = now;
+      if (now - f.awayAt > GRACE) { clearHold(f); f.holdEl = cur; f.holdAcc = 0; f.awayAt = 0; }
+    } else if (cur) { f.holdEl = cur; f.holdAcc = 0; }
+    const need = holdNeed(f.holdEl);
     if (need) {
-      setProgress(act.holdEl, act.holdAcc / need);
-      if (act.holdAcc >= need) {
-        const el = act.holdEl;
-        el.style.removeProperty('--p');
-        act.done = true; setHover(null); bubble.hidden = true;
-        activate(el, true);
+      setProgress(f.holdEl, f.holdAcc / need);
+      if (f.holdAcc >= need) {
+        const el = f.holdEl;
+        clearHold(f);
+        fingers.forEach(v => { v.done = true; });
+        hide();
+        activate(el);
         return;
       }
     }
     raf = requestAnimationFrame(holdTick);
+  }
+  function resume() { // 算數的手指換了一根：接著顯示它的狀態
+    cancelAnimationFrame(raf);
+    const f = top();
+    if (!f || f.done) return hide();
+    f.lastT = performance.now();
+    show(f);
+    if (cfg.press === 'hold') raf = requestAnimationFrame(holdTick);
   }
   function nope(el) {
     if (!el || cfg.calm) return;
     el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope');
     setTimeout(() => el.classList.remove('nope'), 320);
   }
-  function activate(el, held = false) {
+  function activate(el) {
     if (!el) return;
     if (isOff(el)) { nope(el); return; }
-    if (el.dataset.hold && !held) { nope(el); toast('要按住一秒才會打開'); return; }
     const now = performance.now();
     if (now < lockUntil) return; // 手抖連按：這段時間內再碰到都不算
-    lockUntil = now + Math.max(220, cfg.guard * 1000);
+    lockUntil = now + Math.max(200, cfg.guard * 1000);
     el.classList.add('picked');
     Sound.tick();
     try { navigator.vibrate?.(12); } catch { /* 有些裝置不能震動 */ }
@@ -896,50 +906,51 @@ const Touch = (() => {
     if (sheetOpen()) return;
     e.preventDefault();
     refresh();
-    if (act) end(); // 新的手指接手；先放著的那根之後放開不算
-    const palm = (e.width || 0) >= PALM && (e.height || 0) >= PALM;
-    act = { id: e.pointerId, type: e.pointerType, trail: [], done: palm, palm, holdEl: null, holdAcc: 0, awayAt: 0, lastT: performance.now() };
-    if (palm) return;
-    move(e.clientX, e.clientY);
-    const first = act.trail[act.trail.length - 1].el;
-    if (cfg.press === 'down' && !(first && first.dataset.hold)) {
-      act.done = true; setHover(null); bubble.hidden = true;
-      if (first) activate(first);
-      return;
-    }
-    raf = requestAnimationFrame(holdTick);
+    const f = { id: e.pointerId, type: e.pointerType, trail: [], done: false, holdEl: null, holdAcc: 0, awayAt: 0, lastT: performance.now(), x: e.clientX, y: e.clientY };
+    track(f, e.clientX, e.clientY);
+    if (cfg.press === 'down') { hide(); activate(at(f)); return; } // 一碰就選：不用再追蹤
+    clearHold(top());
+    fingers = fingers.filter(v => v.id !== e.pointerId);
+    fingers.push(f);
+    resume();
   }
-  function onMove(e) { if (act && e.pointerId === act.id) move(e.clientX, e.clientY); }
-  function onUp(e) {
+  function onMove(e) {
+    const f = fingers.find(v => v.id === e.pointerId);
+    if (!f) return;
+    track(f, e.clientX, e.clientY);
+    if (f === top()) show(f);
+  }
+  // 放開，或被系統手勢搶走（pointercancel）：都照放開處理，手指按著的格子還是算
+  function finish(e, cancelled) {
     lastUp = performance.now();
-    Unlock.now(); // 語音和提示音要在使用者的動作裡解鎖（iPad 的規定）
-    if (!act || e.pointerId !== act.id) return;
-    const a = act;
-    if (!a.done) move(e.clientX, e.clientY);
-    const now = performance.now();
-    end();
-    if (a.done || a.palm) return;
-    const el = releaseChoice(a.trail, now, SETTLE, MIN_STAY);
-    if (el && el.dataset.hold) { activate(el); return; } // 沒按滿一秒就放開：提醒要按住
-    if (cfg.press === 'lift' && el) activate(el);
+    if (!cancelled) Unlock.now(); // 語音和提示音要在使用者的動作裡解鎖（iPad 的規定）
+    const i = fingers.findIndex(v => v.id === e.pointerId);
+    if (i < 0) return;
+    const f = fingers[i], wasTop = i === fingers.length - 1;
+    if (!cancelled && !f.done) track(f, e.clientX, e.clientY);
+    clearHold(f);
+    fingers.splice(i, 1);
+    const el = wasTop && !f.done && cfg.press === 'lift' ? releaseChoice(f.trail, performance.now(), SETTLE, MIN_STAY) : null;
+    if (el) { fingers.forEach(v => { v.done = true; clearHold(v); }); hide(); activate(el); }
+    if (wasTop) resume();
   }
-  function onCancel(e) { if (act && e.pointerId === act.id) end(); }
   [$('#app'), showEl].forEach(r => {
     r.addEventListener('pointerdown', onDown);
     r.addEventListener('touchmove', e => e.preventDefault(), { passive: false }); // 手指滑動時畫面不捲動
     r.addEventListener('contextmenu', e => e.preventDefault());
   });
   addEventListener('pointermove', onMove, { passive: true });
-  addEventListener('pointerup', onUp);
-  addEventListener('pointercancel', onCancel);
+  addEventListener('pointerup', e => finish(e, false));
+  addEventListener('pointercancel', e => finish(e, true));
   // 外接鍵盤、切換控制、讀屏：用 Enter 或輔助功能「點一下」也能選（手指剛處理過的就不重複）
   document.addEventListener('click', e => {
     const el = e.target.closest?.('[data-target]');
     if (!el || sheetOpen() || performance.now() - lastUp < 700) return;
     Unlock.now();
-    activate(el, true);
+    activate(el);
   });
-  return { refresh, activate, cancel: end };
+  function cancel() { cancelAnimationFrame(raf); fingers.forEach(clearHold); fingers = []; hide(); }
+  return { refresh, activate, cancel };
 })();
 
 // ---------- 語音、提示音 ----------
@@ -1013,7 +1024,7 @@ function fitShow() {
   inner.style.fontSize = Math.floor(lo) + 'px';
 }
 
-// ---------- 設定（在「更多」裡按住一秒才打開，免得被不小心碰到） ----------
+// ---------- 設定 ----------
 function openSettings() {
   Touch.cancel();
   syncForm();
@@ -1069,7 +1080,7 @@ $('#copyText').addEventListener('click', () => {
 // 外接鍵盤：數字鍵選第幾格、Backspace 退回
 document.addEventListener('keydown', e => {
   if (sheetOpen() || e.target.closest?.('input, textarea')) return;
-  if (/^[1-9]$/.test(e.key)) { const b = $$('#board [data-target]')[+e.key - 1]; if (b) { Unlock.now(); Touch.activate(b, true); } }
+  if (/^[1-9]$/.test(e.key)) { const b = $$('#board [data-target]')[+e.key - 1]; if (b) { Unlock.now(); Touch.activate(b); } }
   else if (e.key === 'Backspace') { e.preventDefault(); Touch.activate($('[data-rail="back"]')); }
 });
 
